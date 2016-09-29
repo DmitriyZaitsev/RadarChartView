@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout android:id="@+id/activity_main"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
@@ -10,11 +11,34 @@
   android:paddingTop="@dimen/activity_vertical_margin"
   tools:context="com.dzaitsev.radarchartview.MainActivity">
 
-  <com.dzaitsev.radarchartview.ChartView xmlns:app="http://schemas.android.com/apk/res-auto"
+  <com.dzaitsev.radarchartview.ChartView
     android:id="@+id/radar_chart"
+    android:background="#fff"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    app:axisColor="#22737b"
+    app:axisTick="30"
     app:axisMax="300"
-    app:axisTick="90"
-    app:startColor="@color/colorAccent" />
+    app:endColor="#c3e3e5"
+    app:startColor="#5f9ca1" />
+
+  <SeekBar
+    android:id="@+id/parts"
+    style="@style/Widget.AppCompat.SeekBar.Discrete"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/radar_chart"
+    android:layout_centerHorizontal="true"
+    android:max="24"
+    android:progress="3" />
+
+  <SeekBar
+    android:id="@+id/sectors"
+    style="@style/Widget.AppCompat.SeekBar.Discrete"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/parts"
+    android:layout_centerHorizontal="true"
+    android:max="10"
+    android:progress="3" />
 </RelativeLayout>

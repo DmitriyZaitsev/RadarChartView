@@ -21,7 +21,7 @@ public final class ChartView extends RadarChartView {
     addOrReplace("Item 2", 11);
     addOrReplace("Item 3", 33);
     addOrReplace("Item 4", 26);
-    addOrReplace("Item 5", 5);
+    //addOrReplace("Item 5", 5);
     //addOrReplace("Item 6", 16);
     //addOrReplace("Item 7", 30);
     //addOrReplace("Item 8", 30);
