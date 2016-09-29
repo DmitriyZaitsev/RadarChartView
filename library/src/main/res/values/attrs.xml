@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <declare-styleable name="RadarChartView">
+    <attr name="startColor" format="color" />
+    <attr name="endColor" format="color" />
+    <attr name="parts" format="integer" />
+    <attr name="axisMax" format="float" />
+    <attr name="axisTickInterval" format="float" />
+    <attr name="textSize" format="dimension" />
+  </declare-styleable>
+</resources>
