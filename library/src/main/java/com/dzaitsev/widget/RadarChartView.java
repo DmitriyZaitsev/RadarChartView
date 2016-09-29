@@ -3,14 +3,17 @@ package com.dzaitsev.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static android.graphics.Color.RED;
 import static android.graphics.Color.alpha;
 import static android.graphics.Color.argb;
 import static android.graphics.Color.blue;
@@ -31,20 +34,19 @@ import static java.lang.Math.min;
  */
 public class RadarChartView extends View {
   private static final int MIN_SIZE = 300;
+  private static final String TAG = "RadarChartView";
   private final Map<String, Float> mSectors;
   private       int                mStartColor;
   private       int                mEndColor;
   private       int                mAxisColor;
-  private       Paint[]            mPaints;
-  private       Path[]             mPaths;
   private       float              mAxisMax;
   private       float              mAxisTick;
   private       int                mTextSize;
   private       int                mCenterX;
   private       int                mCenterY;
-  private       int                mParts;
   private       Paint              mAxisPaint;
   private       Ring[]             mRings;
+  private       boolean            mCirclesOnly;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -72,16 +74,21 @@ public class RadarChartView extends View {
     mAxisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
     mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, 5);
     mTextSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 12);
+    mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     values.recycle();
 
     mAxisPaint = createPaint(mAxisColor);
 
-    mParts = ((int) mAxisMax / (int) mAxisTick) + ((int) mAxisMax % (int) mAxisTick > 0 ? 1 : 0);
-    setParts(mParts);
+    setAxisTickInternal(mAxisTick);
   }
 
   public void addOrReplace(String sector, float value) {
     mSectors.put(sector, value);
+    invalidate();
+  }
+
+  public void clearSectors() {
+    mSectors.clear();
     invalidate();
   }
 
@@ -90,30 +97,14 @@ public class RadarChartView extends View {
     invalidate();
   }
 
-  public void setParts(int parts) {
-    mParts = parts;
-    mPaints = new Paint[parts];
-    mPaths = new Path[parts];
-    mRings = new Ring[parts];
+  public void setAxisTick(float axisTick) {
+    mAxisTick = axisTick;
+    setAxisTickInternal(axisTick);
+    invalidate();
+  }
 
-    final int size = parts - 1;
-    if (size == 0) {
-      mPaints[0] = createPaint(mStartColor);
-      mPaths[0] = new Path();
-      mRings[0] = new Ring(mAxisMax, mAxisMax);
-    } else {
-      for (int i = 0; i <= size; i++) {
-        final int alpha = color(alpha(mStartColor), alpha(mEndColor), size, i);
-        final int red = color(red(mStartColor), red(mEndColor), size, i);
-        final int green = color(green(mStartColor), green(mEndColor), size, i);
-        final int blue = color(blue(mStartColor), blue(mEndColor), size, i);
-
-        mPaints[i] = createPaint(argb(alpha, red, green, blue));
-        mPaths[i] = new Path();
-        mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick);
-      }
-      mRings[size] = new Ring(mAxisMax, mAxisMax - mRings[size - 1].radius);
-    }
+  public void setCirclesOnly(boolean circlesOnly) {
+    mCirclesOnly = circlesOnly;
     invalidate();
   }
 
@@ -122,7 +113,7 @@ public class RadarChartView extends View {
     mCenterY = (getBottom() - getTop()) / 2;
 
     final int size = mSectors.size();
-    if (size < 3) {
+    if (size < 3 || mCirclesOnly) {
       drawCircles(canvas);
     } else {
       drawPolygons(canvas, size);
@@ -148,31 +139,25 @@ public class RadarChartView extends View {
   }
 
   private void drawCircles(Canvas canvas) {
-    for (int i = 0; i < mParts; i++) {
-      final Path path = mPaths[i];
-      final Ring ring = mRings[i];
+    for (final Ring ring : mRings) {
+      final Path path = ring.path;
 
+      path.reset();
       path.moveTo(mCenterX, mCenterY);
       path.addCircle(mCenterX, mCenterY, ring.fixedRadius, CW);
       path.close();
 
-      final Paint paint = mPaints[i];
-      paint.setStrokeWidth(ring.width);
-      canvas.drawPath(path, paint);
+      canvas.drawPath(path, ring.paint);
     }
   }
 
-  public void clearSectors() {
-    mSectors.clear();
-    invalidate();
-  }
-
   private void drawPolygons(Canvas canvas, int size) {
-    for (int i = 0; i < mParts; i++) {
-      final Path path = mPaths[i];
-      final Ring ring = mRings[i];
+    for (final Ring ring : mRings) {
+      final Path path = ring.path;
       final Point[] points = createPoints(size, ring.fixedRadius, mCenterX, mCenterY);
       final Point start = points[0];
+
+      path.reset();
       path.moveTo(start.x, start.y);
       for (int j = 1; j < size; j++) {
         final Point to = points[j];
@@ -181,9 +166,33 @@ public class RadarChartView extends View {
       path.lineTo(start.x, start.y);
       path.close();
 
-      final Paint paint = mPaints[i];
-      paint.setStrokeWidth(ring.width);
-      canvas.drawPath(path, paint);
+      canvas.drawPath(path, ring.paint);
+    }
+  }
+
+  private void setAxisTickInternal(float axisTick) {
+    Log.i(TAG, "setAxisTick = " + axisTick);
+    final int parts = ((int) mAxisMax / (int) axisTick) + ((int) mAxisMax % (int) axisTick > 0 ? 1 : 0);
+    Log.i(TAG, "parts       = " + parts);
+    mRings = new Ring[parts];
+
+    final int size = parts - 1;
+    if (size == 0) {
+      mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
+    } else {
+      for (int i = 0; i <= size; i++) {
+        final int alpha = color(alpha(mStartColor), alpha(mEndColor), size, i);
+        final int red = color(red(mStartColor), red(mEndColor), size, i);
+        final int green = color(green(mStartColor), green(mEndColor), size, i);
+        final int blue = color(blue(mStartColor), blue(mEndColor), size, i);
+        final int color = argb(alpha, red, green, blue);
+
+        if (i == size) {
+          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[size - 1].radius, color);
+        } else {
+          mRings[i] = new Ring(axisTick * (i + 1), axisTick, color);
+        }
+      }
     }
   }
 
@@ -191,11 +200,25 @@ public class RadarChartView extends View {
     final float width;
     final float radius;
     final float fixedRadius;
+    final Paint paint;
+    final Path  path;
 
-    Ring(float radius, float width) {
+    Ring(float radius, float width, int color) {
       this.radius = radius;
       this.width = width;
+      paint = createPaint(color);
+      paint.setStrokeWidth(width);
+      path = new Path();
       fixedRadius = radius - width / 2;
+      Log.v(TAG, toString());
+    }
+
+    @Override public String toString() {
+      return "Ring{" +
+          "radius=" + radius +
+          ", width=" + width +
+          ", fixedRadius=" + fixedRadius +
+          '}';
     }
   }
 }

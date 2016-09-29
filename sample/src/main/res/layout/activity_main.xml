@@ -17,7 +17,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:axisColor="#22737b"
-    app:axisTick="30"
+    app:axisTick="90"
     app:axisMax="300"
     app:endColor="#c3e3e5"
     app:startColor="#5f9ca1" />
@@ -29,8 +29,8 @@
     android:layout_height="wrap_content"
     android:layout_below="@+id/radar_chart"
     android:layout_centerHorizontal="true"
-    android:max="24"
-    android:progress="3" />
+    android:max="15"
+    android:progress="5" />
 
   <SeekBar
     android:id="@+id/sectors"
@@ -39,6 +39,15 @@
     android:layout_height="wrap_content"
     android:layout_below="@+id/parts"
     android:layout_centerHorizontal="true"
-    android:max="10"
-    android:progress="3" />
+    android:max="20"
+    android:progress="5" />
+
+  <CheckBox
+    android:text="Circles only"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/sectors"
+    android:layout_alignParentLeft="true"
+    android:layout_alignParentStart="true"
+    android:id="@+id/checkBox" />
 </RelativeLayout>
