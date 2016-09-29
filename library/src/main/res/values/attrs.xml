@@ -5,7 +5,7 @@
     <attr name="endColor" format="color" />
     <attr name="parts" format="integer" />
     <attr name="axisMax" format="float" />
-    <attr name="axisTickInterval" format="float" />
+    <attr name="axisTick" format="float" />
     <attr name="textSize" format="dimension" />
   </declare-styleable>
 </resources>
