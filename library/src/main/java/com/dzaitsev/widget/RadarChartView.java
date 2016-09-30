@@ -3,7 +3,6 @@ package com.dzaitsev.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
@@ -13,7 +12,6 @@ import android.view.View;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static android.graphics.Color.RED;
 import static android.graphics.Color.alpha;
 import static android.graphics.Color.argb;
 import static android.graphics.Color.blue;
@@ -24,6 +22,8 @@ import static android.graphics.Path.Direction.CW;
 import static com.dzaitsev.widget.Utils.color;
 import static com.dzaitsev.widget.Utils.createPaint;
 import static com.dzaitsev.widget.Utils.createPoints;
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
 import static java.lang.Math.min;
 
 /**
@@ -147,6 +147,7 @@ public class RadarChartView extends View {
       path.addCircle(mCenterX, mCenterY, ring.fixedRadius, CW);
       path.close();
 
+      ring.paint.setStrokeWidth(ring.width + 2);
       canvas.drawPath(path, ring.paint);
     }
   }
@@ -166,6 +167,7 @@ public class RadarChartView extends View {
       path.lineTo(start.x, start.y);
       path.close();
 
+      ring.paint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
       canvas.drawPath(path, ring.paint);
     }
   }
@@ -181,15 +183,14 @@ public class RadarChartView extends View {
       mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
     } else {
       for (int i = 0; i <= size; i++) {
-        final int alpha = color(alpha(mStartColor), alpha(mEndColor), size, i);
-        final int red = color(red(mStartColor), red(mEndColor), size, i);
-        final int green = color(green(mStartColor), green(mEndColor), size, i);
-        final int blue = color(blue(mStartColor), blue(mEndColor), size, i);
-        final int color = argb(alpha, red, green, blue);
-
         if (i == size) {
-          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[size - 1].radius, color);
+          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[size - 1].radius, mEndColor);
         } else {
+          final int alpha = color(alpha(mStartColor), alpha(mEndColor), size, i);
+          final int red = color(red(mStartColor), red(mEndColor), size, i);
+          final int green = color(green(mStartColor), green(mEndColor), size, i);
+          final int blue = color(blue(mStartColor), blue(mEndColor), size, i);
+          final int color = argb(alpha, red, green, blue);
           mRings[i] = new Ring(axisTick * (i + 1), axisTick, color);
         }
       }
@@ -207,7 +208,6 @@ public class RadarChartView extends View {
       this.radius = radius;
       this.width = width;
       paint = createPaint(color);
-      paint.setStrokeWidth(width);
       path = new Path();
       fixedRadius = radius - width / 2;
       Log.v(TAG, toString());
