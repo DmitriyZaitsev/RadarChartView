@@ -33,8 +33,8 @@ import static java.lang.Math.min;
  * @since 2016-Sep-28, 14:15
  */
 public class RadarChartView extends View {
-  private static final int MIN_SIZE = 300;
-  private static final String TAG = "RadarChartView";
+  private static final int    MIN_SIZE = 300;
+  private static final String TAG      = "RadarChartView";
   private final Map<String, Float> mSectors;
   private       int                mStartColor;
   private       int                mEndColor;
@@ -97,10 +97,55 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public int getAxisColor() {
+    return mAxisColor;
+  }
+
+  public void setAxisColor(int axisColor) {
+    mAxisColor = axisColor;
+    invalidate();
+  }
+
+  public float getAxisMax() {
+    return mAxisMax;
+  }
+
+  public void setAxisMax(float axisMax) {
+    mAxisMax = axisMax;
+    invalidate();
+  }
+
+  public float getAxisTick() {
+    return mAxisTick;
+  }
+
   public void setAxisTick(float axisTick) {
     mAxisTick = axisTick;
     setAxisTickInternal(axisTick);
     invalidate();
+  }
+
+  public int getEndColor() {
+    return mEndColor;
+  }
+
+  public void setEndColor(int endColor) {
+    mEndColor = endColor;
+    invalidate();
+    invalidate();
+  }
+
+  public int getStartColor() {
+    return mStartColor;
+  }
+
+  public void setStartColor(int startColor) {
+    mStartColor = startColor;
+    invalidate();
+  }
+
+  public boolean isCirclesOnly() {
+    return mCirclesOnly;
   }
 
   public void setCirclesOnly(boolean circlesOnly) {
