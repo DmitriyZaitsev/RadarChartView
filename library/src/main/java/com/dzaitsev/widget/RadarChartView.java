@@ -8,7 +8,6 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -233,23 +232,20 @@ public class RadarChartView extends View {
   }
 
   private void setAxisTickInternal(float axisTick) {
-    Log.i(TAG, "setAxisTick = " + axisTick);
     final int parts = ((int) mAxisMax / (int) axisTick) + ((int) mAxisMax % (int) axisTick > 0 ? 1 : 0);
-    Log.i(TAG, "parts       = " + parts);
     mRings = new Ring[parts];
 
-    final int size = parts - 1;
-    if (size == 0) {
+    if (parts == 1) {
       mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
     } else {
-      for (int i = 0; i <= size; i++) {
-        if (i == size) {
-          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[size - 1].radius, mEndColor);
+      for (int i = 0; i < parts; i++) {
+        if (i == parts - 1) {
+          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[parts - 2].radius, mEndColor);
         } else {
-          final int alpha = color(alpha(mStartColor), alpha(mEndColor), size, i);
-          final int red = color(red(mStartColor), red(mEndColor), size, i);
-          final int green = color(green(mStartColor), green(mEndColor), size, i);
-          final int blue = color(blue(mStartColor), blue(mEndColor), size, i);
+          final int alpha = color(alpha(mStartColor), alpha(mEndColor), parts, i);
+          final int red = color(red(mStartColor), red(mEndColor), parts, i);
+          final int green = color(green(mStartColor), green(mEndColor), parts, i);
+          final int blue = color(blue(mStartColor), blue(mEndColor), parts, i);
           final int color = argb(alpha, red, green, blue);
           mRings[i] = new Ring(axisTick * (i + 1), axisTick, color);
         }
@@ -271,7 +267,6 @@ public class RadarChartView extends View {
       paint = createPaint(color);
       path = new Path();
       fixedRadius = radius - width / 2;
-      Log.v(TAG, toString());
     }
 
     @Override public String toString() {
