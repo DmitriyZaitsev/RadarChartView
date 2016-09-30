@@ -204,7 +204,7 @@ public class RadarChartView extends View {
   }
 
   private void calculateCenter() {
-    mCenterX = (getRight() - getPaddingLeft()) / 2 + getPaddingLeft() - getPaddingRight();
+    mCenterX = (getRight() - getLeft()) / 2 + getPaddingLeft() - getPaddingRight();
     mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
   }
 
