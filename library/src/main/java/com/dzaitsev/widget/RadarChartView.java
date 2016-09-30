@@ -81,7 +81,7 @@ public class RadarChartView extends View {
     mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     mTextPaint.setTextSize(textSize);
 
-    setAxisTickInternal(mAxisTick);
+    buildRings();
   }
 
   public void addOrReplace(String sector, float value) {
@@ -114,6 +114,7 @@ public class RadarChartView extends View {
 
   public void setAxisMax(float axisMax) {
     mAxisMax = axisMax;
+    buildRings();
     invalidate();
   }
 
@@ -123,7 +124,7 @@ public class RadarChartView extends View {
 
   public void setAxisTick(float axisTick) {
     mAxisTick = axisTick;
-    setAxisTickInternal(axisTick);
+    buildRings();
     invalidate();
   }
 
@@ -174,15 +175,37 @@ public class RadarChartView extends View {
     drawAxis(canvas, size);
   }
 
-  private void calculateCenter() {
-    mCenterX = (getRight() - getPaddingLeft()) / 2 + getPaddingLeft() - getPaddingRight();
-    mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
-  }
-
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     final int size = min(resolveSize(MIN_SIZE, widthMeasureSpec), resolveSize(MIN_SIZE, heightMeasureSpec));
     setMeasuredDimension(size, size);
     calculateCenter();
+  }
+
+  private void buildRings() {
+    final int parts = ((int) mAxisMax / (int) mAxisTick) + ((int) mAxisMax % (int) mAxisTick > 0 ? 1 : 0);
+    mRings = new Ring[parts];
+
+    if (parts == 1) {
+      mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
+    } else {
+      for (int i = 0; i < parts; i++) {
+        if (i == parts - 1) {
+          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[parts - 2].radius, mEndColor);
+        } else {
+          final int alpha = color(alpha(mStartColor), alpha(mEndColor), parts, i);
+          final int red = color(red(mStartColor), red(mEndColor), parts, i);
+          final int green = color(green(mStartColor), green(mEndColor), parts, i);
+          final int blue = color(blue(mStartColor), blue(mEndColor), parts, i);
+          final int color = argb(alpha, red, green, blue);
+          mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick, color);
+        }
+      }
+    }
+  }
+
+  private void calculateCenter() {
+    mCenterX = (getRight() - getPaddingLeft()) / 2 + getPaddingLeft() - getPaddingRight();
+    mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
   }
 
   private void drawAxis(Canvas canvas, int size) {
@@ -228,28 +251,6 @@ public class RadarChartView extends View {
 
       ring.paint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
       canvas.drawPath(path, ring.paint);
-    }
-  }
-
-  private void setAxisTickInternal(float axisTick) {
-    final int parts = ((int) mAxisMax / (int) axisTick) + ((int) mAxisMax % (int) axisTick > 0 ? 1 : 0);
-    mRings = new Ring[parts];
-
-    if (parts == 1) {
-      mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
-    } else {
-      for (int i = 0; i < parts; i++) {
-        if (i == parts - 1) {
-          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[parts - 2].radius, mEndColor);
-        } else {
-          final int alpha = color(alpha(mStartColor), alpha(mEndColor), parts, i);
-          final int red = color(red(mStartColor), red(mEndColor), parts, i);
-          final int green = color(green(mStartColor), green(mEndColor), parts, i);
-          final int blue = color(blue(mStartColor), blue(mEndColor), parts, i);
-          final int color = argb(alpha, red, green, blue);
-          mRings[i] = new Ring(axisTick * (i + 1), axisTick, color);
-        }
-      }
     }
   }
 

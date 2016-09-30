@@ -29,7 +29,7 @@
     android:layout_height="wrap_content"
     android:layout_below="@+id/radar_chart"
     android:layout_centerHorizontal="true"
-    android:max="15"
+    android:max="75"
     android:progress="5" />
 
   <SeekBar

@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     parts.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (progress == 0) progress = 1;
-        chart.setAxisTick(progress * 20);
+        chart.setAxisTick(progress * 4);
       }
       @Override public void onStartTrackingTouch(SeekBar seekBar) {}
       @Override public void onStopTrackingTouch(SeekBar seekBar) {}
