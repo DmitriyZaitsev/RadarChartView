@@ -2,7 +2,7 @@ package com.dzaitsev.widget;
 
 import android.content.res.Resources;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
 import static android.graphics.Paint.Style.STROKE;
@@ -33,12 +33,12 @@ final class Utils {
     return (int) (dp * resources.getDisplayMetrics().density + 0.5F);
   }
 
-  @NonNull static Point[] createPoints(int amount, float radius, float x0, float y0) {
-    final Point[] points = new Point[amount];
+  @NonNull static PointF[] createPoints(int amount, float radius, float x0, float y0) {
+    final PointF[] points = new PointF[amount];
     final double angle = 2 * PI / amount;
     for (int i = 0; i < amount; i++) {
       final double alpha = angle * i - PI / 2;
-      points[i] = new Point((int) (radius * cos(alpha) + x0), (int) (radius * sin(alpha) + y0));
+      points[i] = new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
     }
     return points;
   }

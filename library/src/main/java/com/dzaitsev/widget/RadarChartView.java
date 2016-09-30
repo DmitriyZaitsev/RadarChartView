@@ -5,7 +5,8 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
+import android.graphics.PointF;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -41,7 +42,7 @@ public class RadarChartView extends View {
   private       int                mAxisColor;
   private       float              mAxisMax;
   private       float              mAxisTick;
-  private       int                mTextSize;
+  private       TextPaint          mTextPaint;
   private       int                mCenterX;
   private       int                mCenterY;
   private       Paint              mAxisPaint;
@@ -73,11 +74,13 @@ public class RadarChartView extends View {
     mAxisColor = values.getColor(R.styleable.RadarChartView_axisColor, colorAccent);
     mAxisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
     mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, 5);
-    mTextSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 12);
+    final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 12);
     mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     values.recycle();
 
     mAxisPaint = createPaint(mAxisColor);
+    mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    mTextPaint.setTextSize(textSize);
 
     setAxisTickInternal(mAxisTick);
   }
@@ -153,9 +156,15 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public void setTextSize(float textSize) {
+    mTextPaint.setTextSize(textSize);
+    invalidate();
+  }
+
   @Override protected void onDraw(Canvas canvas) {
-    mCenterX = (getRight() - getLeft()) / 2;
-    mCenterY = (getBottom() - getTop()) / 2;
+    if (isInEditMode()) {
+      calculateCenter();
+    }
 
     final int size = mSectors.size();
     if (size < 3 || mCirclesOnly) {
@@ -166,17 +175,23 @@ public class RadarChartView extends View {
     drawAxis(canvas, size);
   }
 
+  private void calculateCenter() {
+    mCenterX = (getRight() - getPaddingLeft()) / 2 + getPaddingLeft() - getPaddingRight();
+    mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
+  }
+
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     final int size = min(resolveSize(MIN_SIZE, widthMeasureSpec), resolveSize(MIN_SIZE, heightMeasureSpec));
     setMeasuredDimension(size, size);
+    calculateCenter();
   }
 
   private void drawAxis(Canvas canvas, int size) {
     final Path path = new Path();
-    final Point[] points = createPoints(size, mAxisMax, mCenterX, mCenterY);
+    final PointF[] points = createPoints(size, mAxisMax, mCenterX, mCenterY);
     for (int i = 0; i < size; i++) {
       path.moveTo(mCenterX, mCenterY);
-      final Point point = points[i];
+      final PointF point = points[i];
       path.lineTo(point.x, point.y);
       path.close();
       canvas.drawPath(path, mAxisPaint);
@@ -200,13 +215,13 @@ public class RadarChartView extends View {
   private void drawPolygons(Canvas canvas, int size) {
     for (final Ring ring : mRings) {
       final Path path = ring.path;
-      final Point[] points = createPoints(size, ring.fixedRadius, mCenterX, mCenterY);
-      final Point start = points[0];
+      final PointF[] points = createPoints(size, ring.fixedRadius, mCenterX, mCenterY);
+      final PointF start = points[0];
 
       path.reset();
       path.moveTo(start.x, start.y);
       for (int j = 1; j < size; j++) {
-        final Point to = points[j];
+        final PointF to = points[j];
         path.lineTo(to.x, to.y);
       }
       path.lineTo(start.x, start.y);
@@ -248,6 +263,7 @@ public class RadarChartView extends View {
     final float fixedRadius;
     final Paint paint;
     final Path  path;
+    PointF[] points;
 
     Ring(float radius, float width, int color) {
       this.radius = radius;
