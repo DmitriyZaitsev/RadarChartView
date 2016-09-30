@@ -33,8 +33,7 @@ import static java.lang.Math.min;
  * @since 2016-Sep-28, 14:15
  */
 public class RadarChartView extends View {
-  private static final int    MIN_SIZE = 300;
-  private static final String TAG      = "RadarChartView";
+  private static final int MIN_SIZE = 300;
   private final Map<String, Float> mSectors;
   private       int                mStartColor;
   private       int                mEndColor;
@@ -86,16 +85,19 @@ public class RadarChartView extends View {
 
   public void addOrReplace(String sector, float value) {
     mSectors.put(sector, value);
+    fillRingsWithPoints();
     invalidate();
   }
 
   public void clearSectors() {
     mSectors.clear();
+    fillRingsWithPoints();
     invalidate();
   }
 
   public void remove(String sector) {
     mSectors.remove(sector);
+    fillRingsWithPoints();
     invalidate();
   }
 
@@ -201,11 +203,21 @@ public class RadarChartView extends View {
         }
       }
     }
+
+    fillRingsWithPoints();
   }
 
   private void calculateCenter() {
     mCenterX = (getRight() - getLeft()) / 2 + getPaddingLeft() - getPaddingRight();
     mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
+
+    fillRingsWithPoints();
+  }
+
+  private void fillRingsWithPoints() {
+    for (Ring ring : mRings) {
+      ring.points = createPoints(mSectors.size(), ring.fixedRadius, mCenterX, mCenterY);
+    }
   }
 
   private void drawAxis(Canvas canvas, int size) {
@@ -237,7 +249,7 @@ public class RadarChartView extends View {
   private void drawPolygons(Canvas canvas, int size) {
     for (final Ring ring : mRings) {
       final Path path = ring.path;
-      final PointF[] points = createPoints(size, ring.fixedRadius, mCenterX, mCenterY);
+      final PointF[] points = ring.points;
       final PointF start = points[0];
 
       path.reset();
