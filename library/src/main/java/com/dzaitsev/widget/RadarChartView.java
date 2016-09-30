@@ -6,9 +6,11 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -45,6 +47,7 @@ public class RadarChartView extends View {
   private       Paint              mAxisPaint;
   private       Ring[]             mRings;
   private       boolean            mCirclesOnly;
+  private final Rect mRect = new Rect();
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -71,13 +74,14 @@ public class RadarChartView extends View {
     mAxisColor = values.getColor(R.styleable.RadarChartView_axisColor, colorAccent);
     mAxisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
     mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, 5);
-    final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 12);
+    final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 15);
     mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     values.recycle();
 
     mAxisPaint = createPaint(mAxisColor);
     mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
     mTextPaint.setTextSize(textSize);
+    mTextPaint.density = getResources().getDisplayMetrics().density;
 
     buildRings();
   }
@@ -227,12 +231,20 @@ public class RadarChartView extends View {
   private void drawAxis(Canvas canvas, int size) {
     final Path path = new Path();
     final PointF[] points = createPoints(size, mAxisMax, mCenterX, mCenterY);
+    final Iterator<String> sectors = mSectors.keySet()
+        .iterator();
     for (int i = 0; i < size; i++) {
-      path.moveTo(mCenterX, mCenterY);
       final PointF point = points[i];
+      path.moveTo(mCenterX, mCenterY);
       path.lineTo(point.x, point.y);
       path.close();
       canvas.drawPath(path, mAxisPaint);
+
+      final String title = sectors.next();
+      mTextPaint.getTextBounds(title, 0, title.length(), mRect);
+      float x = point.x > mCenterX ? point.x : point.x - mRect.width();
+      float y = point.y > mCenterY ? point.y + mRect.height() : point.y;
+      canvas.drawText(title, x, y, mTextPaint);
     }
   }
 

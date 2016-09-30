@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         chart.clearSectors();
         for (int i = 0; i < progress; i++) {
-          chart.addOrReplace("Sector " + i, i);
+          chart.addOrReplace("Item " + i, i);
         }
       }
       @Override public void onStartTrackingTouch(SeekBar seekBar) {}

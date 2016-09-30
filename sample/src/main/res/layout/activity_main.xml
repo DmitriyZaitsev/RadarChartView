@@ -19,7 +19,8 @@
     android:background="#fff"
     android:padding="30dp"
     app:axisColor="#22737b"
-    app:axisMax="300"
+    app:textSize="12sp"
+    app:axisMax="280"
     app:axisTick="90"
     app:endColor="#c3e3e5"
     app:startColor="#5f9ca1" />
