@@ -1,6 +1,5 @@
 package com.dzaitsev.widget;
 
-import android.content.res.Resources;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.support.annotation.NonNull;
@@ -27,10 +26,6 @@ final class Utils {
 
   static int color(int start, int end, int size, int factor) {
     return start + (end - start) / size * factor;
-  }
-
-  private static int px(float dp, Resources resources) {
-    return (int) (dp * resources.getDisplayMetrics().density + 0.5F);
   }
 
   @NonNull static PointF[] createPoints(int amount, float radius, float x0, float y0) {

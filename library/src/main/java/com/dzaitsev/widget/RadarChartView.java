@@ -33,7 +33,6 @@ import static java.lang.Math.min;
  * @since 2016-Sep-28, 14:15
  */
 public class RadarChartView extends View {
-  private static final int MIN_SIZE = 300;
   private final Map<String, Float> mSectors;
   private       int                mStartColor;
   private       int                mEndColor;
@@ -178,8 +177,13 @@ public class RadarChartView extends View {
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    final int size = min(resolveSize(MIN_SIZE, widthMeasureSpec), resolveSize(MIN_SIZE, heightMeasureSpec));
-    setMeasuredDimension(size, size);
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    final int width = getMeasuredWidth();
+    final int height = getMeasuredHeight();
+    if (width != height) {
+      final int size = min(width, height);
+      setMeasuredDimension(size, size);
+    }
     calculateCenter();
   }
 

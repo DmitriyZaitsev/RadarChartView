@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/activity_main"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout android:id="@+id/activity_main"
   xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
   xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
+  android:orientation="vertical"
   android:paddingBottom="@dimen/activity_vertical_margin"
   android:paddingLeft="@dimen/activity_horizontal_margin"
   android:paddingRight="@dimen/activity_horizontal_margin"
@@ -13,12 +14,13 @@
 
   <com.dzaitsev.radarchartview.ChartView
     android:id="@+id/radar_chart"
-    android:background="#fff"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#fff"
+    android:padding="30dp"
     app:axisColor="#22737b"
-    app:axisTick="90"
     app:axisMax="300"
+    app:axisTick="90"
     app:endColor="#c3e3e5"
     app:startColor="#5f9ca1" />
 
@@ -27,9 +29,7 @@
     style="@style/Widget.AppCompat.SeekBar.Discrete"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/radar_chart"
-    android:layout_centerHorizontal="true"
-    android:max="50"
+    android:max="30"
     android:progress="5" />
 
   <SeekBar
@@ -37,17 +37,12 @@
     style="@style/Widget.AppCompat.SeekBar.Discrete"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/parts"
-    android:layout_centerHorizontal="true"
-    android:max="20"
+    android:max="12"
     android:progress="5" />
 
   <CheckBox
-    android:text="Circles only"
+    android:id="@+id/checkBox"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_below="@+id/sectors"
-    android:layout_alignParentLeft="true"
-    android:layout_alignParentStart="true"
-    android:id="@+id/checkBox" />
-</RelativeLayout>
+    android:text="Circles only" />
+</LinearLayout>
