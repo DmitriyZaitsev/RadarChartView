@@ -4,6 +4,11 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
+import static android.graphics.Color.alpha;
+import static android.graphics.Color.argb;
+import static android.graphics.Color.blue;
+import static android.graphics.Color.green;
+import static android.graphics.Color.red;
 import static android.graphics.Paint.Style.STROKE;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
@@ -24,8 +29,12 @@ final class Utils {
     return paint;
   }
 
-  static int color(int start, int end, int size, int factor) {
-    return start + (end - start) / size * factor;
+  static int gradient(int startColor, int endColor, int factor, int steps) {
+    final int alpha = between(alpha(startColor), alpha(endColor), factor, steps);
+    final int red = between(red(startColor), red(endColor), factor, steps);
+    final int green = between(green(startColor), green(endColor), factor, steps);
+    final int blue = between(blue(startColor), blue(endColor), factor, steps);
+    return argb(alpha, red, green, blue);
   }
 
   @NonNull static PointF createPoint(float radius, double alpha, float x0, float y0) {
@@ -40,5 +49,10 @@ final class Utils {
       points[i] = createPoint(radius, alpha, x0, y0);
     }
     return points;
+  }
+
+  private static int between(int startColor, int endColor, int factor, int steps) {
+    final float ratio = (float) factor / steps;
+    return (int) (endColor * ratio + startColor * (1 - ratio));
   }
 }

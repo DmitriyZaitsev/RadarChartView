@@ -13,20 +13,14 @@ import android.view.View;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
-import static android.graphics.Color.alpha;
-import static android.graphics.Color.argb;
-import static android.graphics.Color.blue;
-import static android.graphics.Color.green;
 import static android.graphics.Color.parseColor;
-import static android.graphics.Color.red;
 import static android.graphics.Path.Direction.CW;
-import static com.dzaitsev.widget.Utils.color;
 import static com.dzaitsev.widget.Utils.createPaint;
 import static com.dzaitsev.widget.Utils.createPoints;
+import static com.dzaitsev.widget.Utils.gradient;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
 import static java.lang.Math.min;
-import static java.lang.Math.round;
 
 /**
  * ~ ~ ~ ~ Description ~ ~ ~ ~
@@ -192,20 +186,20 @@ public class RadarChartView extends View {
   }
 
   private void buildRings() {
-    final int parts = mAxisMax == mAxisTick ? 1 : round(mAxisMax / mAxisTick + 0.5F);
-    mRings = new Ring[parts];
-    mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
+    final float fParts = mAxisMax / mAxisTick;
+    final int iParts = (int) fParts;
+    final int ringsCount = iParts + (fParts - iParts > 0 ? 1 : 0);
 
-    for (int i = 1; i < parts; i++) {
-      if (i == parts - 1) {
-        mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[parts - 2].radius, mEndColor);
-      } else {
-        final int alpha = color(alpha(mStartColor), alpha(mEndColor), parts, i);
-        final int red = color(red(mStartColor), red(mEndColor), parts, i);
-        final int green = color(green(mStartColor), green(mEndColor), parts, i);
-        final int blue = color(blue(mStartColor), blue(mEndColor), parts, i);
-        final int color = argb(alpha, red, green, blue);
-        mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick, color);
+    mRings = new Ring[ringsCount];
+    if (ringsCount == 1) {
+      mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
+    } else {
+      for (int i = 0; i < ringsCount; i++) {
+        if (i == ringsCount - 1) {
+          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[ringsCount - 2].radius, mEndColor);
+        } else {
+          mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick, gradient(mStartColor, mEndColor, i, ringsCount));
+        }
       }
     }
 
