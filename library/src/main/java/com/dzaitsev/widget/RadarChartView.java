@@ -15,8 +15,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import static android.graphics.Color.BLACK;
-import static android.graphics.Color.MAGENTA;
 import static android.graphics.Color.parseColor;
+import static android.graphics.Paint.Style.STROKE;
 import static android.graphics.Path.Direction.CW;
 import static com.dzaitsev.widget.Utils.createPaint;
 import static com.dzaitsev.widget.Utils.createPoint;
@@ -43,10 +43,14 @@ public class RadarChartView extends View {
   private int      mStartColor;
   private int      mEndColor;
   private int      mAxisColor;
+  private int      mGraphColor;
   private float    mAxisMax;
   private float    mAxisMaxInternal;
   private float    mAxisTick;
   private float    mAxisTickInternal;
+  private float    mAxisWidth;
+  private float    mGraphWidth;
+  private int      mGraphStyle;
   private int      mCenterX;
   private int      mCenterY;
   private Ring[]   mRings;
@@ -76,12 +80,16 @@ public class RadarChartView extends View {
     final TypedArray values = context.obtainStyledAttributes(attrs, R.styleable.RadarChartView, defStyleAttr, 0);
     mStartColor = values.getColor(R.styleable.RadarChartView_startColor, colorPrimaryDark);
     mEndColor = values.getColor(R.styleable.RadarChartView_endColor, colorPrimary);
-    mAxisColor = values.getColor(R.styleable.RadarChartView_axisColor, colorAccent);
+    mAxisColor = values.getColor(R.styleable.RadarChartView_axisColor, BLACK);
+    mGraphColor = values.getColor(R.styleable.RadarChartView_graphColor, colorAccent);
     mAxisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
-    mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, 5);
+    mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, mAxisMax / 5);
     final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 15);
     mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     mAutoSize = values.getBoolean(R.styleable.RadarChartView_autoSize, true);
+    mAxisWidth = values.getFloat(R.styleable.RadarChartView_axisWidth, 1);
+    mGraphWidth = values.getFloat(R.styleable.RadarChartView_graphWidth, 3);
+    mGraphStyle = values.getInt(R.styleable.RadarChartView_graphStyle, STROKE.ordinal());
     values.recycle();
 
     mAxisMaxInternal = mAxisMax;
@@ -99,11 +107,6 @@ public class RadarChartView extends View {
 
   public void clearAxis() {
     mAxis.clear();
-    onAxisChanged();
-  }
-
-  public void remove(String axis) {
-    mAxis.remove(axis);
     onAxisChanged();
   }
 
@@ -136,6 +139,15 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public float getAxisWidth() {
+    return mAxisWidth;
+  }
+
+  public void setAxisWidth(float axisWidth) {
+    mAxisWidth = axisWidth;
+    invalidate();
+  }
+
   public int getEndColor() {
     return mEndColor;
   }
@@ -146,21 +158,39 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public int getGraphColor() {
+    return mGraphColor;
+  }
+
+  public void setGraphColor(int graphColor) {
+    mGraphColor = graphColor;
+    invalidate();
+  }
+
+  public int getGraphStyle() {
+    return mGraphStyle;
+  }
+
+  public void setGraphStyle(int graphStyle) {
+    mGraphStyle = graphStyle;
+    invalidate();
+  }
+
+  public float getGraphWidth() {
+    return mGraphWidth;
+  }
+
+  public void setGraphWidth(float graphWidth) {
+    mGraphWidth = graphWidth;
+    invalidate();
+  }
+
   public int getStartColor() {
     return mStartColor;
   }
 
   public void setStartColor(int startColor) {
     mStartColor = startColor;
-    invalidate();
-  }
-
-  public boolean isCirclesOnly() {
-    return mCirclesOnly;
-  }
-
-  public void setCirclesOnly(boolean circlesOnly) {
-    mCirclesOnly = circlesOnly;
     invalidate();
   }
 
@@ -174,6 +204,20 @@ public class RadarChartView extends View {
     if (mAutoSize) {
       setAxisMaxInternal(Collections.max(mAxis.values()));
     }
+  }
+
+  public boolean isCirclesOnly() {
+    return mCirclesOnly;
+  }
+
+  public void setCirclesOnly(boolean circlesOnly) {
+    mCirclesOnly = circlesOnly;
+    invalidate();
+  }
+
+  public void remove(String axis) {
+    mAxis.remove(axis);
+    onAxisChanged();
   }
 
   public void setTextSize(float textSize) {
@@ -253,7 +297,8 @@ public class RadarChartView extends View {
     final Iterator<String> axis = mAxis.keySet()
         .iterator();
     mPaint.setColor(mAxisColor);
-    mPaint.setStrokeWidth(1);
+    mPaint.setStrokeWidth(mAxisWidth);
+    mPaint.setStyle(STROKE);
     for (final PointF point : mVertices) {
       mPath.reset();
       mPath.moveTo(mCenterX, mCenterY);
@@ -278,6 +323,7 @@ public class RadarChartView extends View {
 
       mPaint.setColor(ring.color);
       mPaint.setStrokeWidth(ring.width + 2);
+      mPaint.setStyle(STROKE);
       canvas.drawPath(mPath, mPaint);
     }
   }
@@ -298,13 +344,15 @@ public class RadarChartView extends View {
 
       mPaint.setColor(ring.color);
       mPaint.setStrokeWidth((float) (ring.width * cos(PI / count)) + 2);
+      mPaint.setStyle(STROKE);
       canvas.drawPath(mPath, mPaint);
     }
   }
 
   private void drawValues(Canvas canvas) {
-    mPaint.setColor(MAGENTA);
-    mPaint.setStrokeWidth(5);
+    mPaint.setColor(mGraphColor);
+    mPaint.setStrokeWidth(mGraphWidth);
+    mPaint.setStyle(Paint.Style.values()[mGraphStyle]);
     mPath.reset();
 
     Float[] values = new Float[mAxis.size()];
