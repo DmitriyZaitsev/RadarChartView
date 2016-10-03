@@ -32,7 +32,7 @@ import static java.lang.Math.min;
  * @since 2016-Sep-28, 14:15
  */
 public class RadarChartView extends View {
-  private final LinkedHashMap<String, Float> mSectors   = new LinkedHashMap<>();
+  private final LinkedHashMap<String, Float> mAxis      = new LinkedHashMap<>();
   private final Rect                         mRect      = new Rect();
   private final Path                         mPath      = new Path();
   private final TextPaint                    mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -89,19 +89,19 @@ public class RadarChartView extends View {
     buildRings();
   }
 
-  public void addOrReplace(String sector, float value) {
-    mSectors.put(sector, value);
-    onSectorsChanged();
+  public void addOrReplace(String axis, float value) {
+    mAxis.put(axis, value);
+    onAxisChanged();
   }
 
-  public void clearSectors() {
-    mSectors.clear();
-    onSectorsChanged();
+  public void clearAxis() {
+    mAxis.clear();
+    onAxisChanged();
   }
 
-  public void remove(String sector) {
-    mSectors.remove(sector);
-    onSectorsChanged();
+  public void remove(String axis) {
+    mAxis.remove(axis);
+    onAxisChanged();
   }
 
   public int getAxisColor() {
@@ -169,7 +169,7 @@ public class RadarChartView extends View {
     mAutoSize = autoSize;
 
     if (mAutoSize) {
-      setAxisMaxInternal(Collections.max(mSectors.values()));
+      setAxisMaxInternal(Collections.max(mAxis.values()));
     }
   }
 
@@ -184,11 +184,11 @@ public class RadarChartView extends View {
       calculateCenter();
     }
 
-    final int size = mSectors.size();
-    if (size < 3 || mCirclesOnly) {
+    final int count = mAxis.size();
+    if (count < 3 || mCirclesOnly) {
       drawCircles(canvas);
     } else {
-      drawPolygons(canvas, size);
+      drawPolygons(canvas, count);
     }
     drawAxis(canvas);
   }
@@ -224,7 +224,7 @@ public class RadarChartView extends View {
   }
 
   private void buildVertices() {
-    final int count = mSectors.size();
+    final int count = mAxis.size();
     for (Ring ring : mRings) {
       ring.vertices = createPoints(count, ring.fixedRadius, mCenterX, mCenterY);
     }
@@ -246,7 +246,7 @@ public class RadarChartView extends View {
   }
 
   private void drawAxis(Canvas canvas) {
-    final Iterator<String> sectors = mSectors.keySet()
+    final Iterator<String> axis = mAxis.keySet()
         .iterator();
     mPaint.setColor(mAxisColor);
     mPaint.setStrokeWidth(1);
@@ -257,11 +257,11 @@ public class RadarChartView extends View {
       mPath.close();
       canvas.drawPath(mPath, mPaint);
 
-      final String title = sectors.next();
-      mTextPaint.getTextBounds(title, 0, title.length(), mRect);
+      final String axisName = axis.next();
+      mTextPaint.getTextBounds(axisName, 0, axisName.length(), mRect);
       float x = point.x > mCenterX ? point.x : point.x - mRect.width();
       float y = point.y > mCenterY ? point.y + mRect.height() : point.y;
-      canvas.drawText(title, x, y, mTextPaint);
+      canvas.drawText(axisName, x, y, mTextPaint);
     }
   }
 
@@ -278,14 +278,14 @@ public class RadarChartView extends View {
     }
   }
 
-  private void drawPolygons(Canvas canvas, int size) {
+  private void drawPolygons(Canvas canvas, int count) {
     for (final Ring ring : mRings) {
       final PointF[] points = ring.vertices;
       final PointF start = points[0];
 
       mPath.reset();
       mPath.moveTo(start.x, start.y);
-      for (int j = 1; j < size; j++) {
+      for (int j = 1; j < count; j++) {
         final PointF to = points[j];
         mPath.lineTo(to.x, to.y);
       }
@@ -293,14 +293,14 @@ public class RadarChartView extends View {
       mPath.close();
 
       mPaint.setColor(ring.color);
-      mPaint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
+      mPaint.setStrokeWidth((float) (ring.width * cos(PI / count)) + 2);
       canvas.drawPath(mPath, mPaint);
     }
   }
 
-  private void onSectorsChanged() {
-    if (mAutoSize && !mSectors.isEmpty()) {
-      setAxisMaxInternal(Collections.max(mSectors.values()));
+  private void onAxisChanged() {
+    if (mAutoSize && !mAxis.isEmpty()) {
+      setAxisMaxInternal(Collections.max(mAxis.values()));
     } else {
       buildVertices();
       invalidate();

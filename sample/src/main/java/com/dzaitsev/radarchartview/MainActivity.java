@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     ((SeekBar) findViewById(R.id.sectors)).setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        chart.clearSectors();
+        chart.clearAxis();
         final Random random = new Random(System.nanoTime());
         for (int i = 0; i < progress; i++) {
           final int value = Math.min((random.nextInt(270) + 10), 280);
