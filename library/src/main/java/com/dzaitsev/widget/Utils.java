@@ -22,11 +22,16 @@ import static java.lang.Math.sin;
  */
 final class Utils {
   @NonNull static Paint createPaint(int color) {
-    final Paint paint = new Paint();
-    paint.setAntiAlias(true);
+    final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     paint.setStyle(STROKE);
     paint.setColor(color);
     return paint;
+  }
+
+  static void mutatePaint(Paint paint, int color, float strokeWidth, Paint.Style style) {
+    paint.setColor(color);
+    paint.setStrokeWidth(strokeWidth);
+    paint.setStyle(style);
   }
 
   static int gradient(int startColor, int endColor, int factor, int steps) {
@@ -37,16 +42,16 @@ final class Utils {
     return argb(alpha, red, green, blue);
   }
 
-  @NonNull static PointF createPoint(float radius, double alpha, float x0, float y0) {
+  @NonNull static PointF createPointF(float radius, double alpha, float x0, float y0) {
     return new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
   }
 
-  @NonNull static PointF[] createPoints(int count, float radius, float x0, float y0) {
+  @NonNull static PointF[] createPointFs(int count, float radius, float x0, float y0) {
     final PointF[] points = new PointF[count];
     final double angle = 2 * PI / count;
     for (int i = 0; i < count; i++) {
       final double alpha = angle * i - PI / 2;
-      points[i] = createPoint(radius, alpha, x0, y0);
+      points[i] = createPointF(radius, alpha, x0, y0);
     }
     return points;
   }
