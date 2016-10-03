@@ -41,10 +41,10 @@ final class Utils {
     return new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
   }
 
-  @NonNull static PointF[] createPoints(int amount, float radius, float x0, float y0) {
-    final PointF[] points = new PointF[amount];
-    final double angle = 2 * PI / amount;
-    for (int i = 0; i < amount; i++) {
+  @NonNull static PointF[] createPoints(int count, float radius, float x0, float y0) {
+    final PointF[] points = new PointF[count];
+    final double angle = 2 * PI / count;
+    for (int i = 0; i < count; i++) {
       final double alpha = angle * i - PI / 2;
       points[i] = createPoint(radius, alpha, x0, y0);
     }

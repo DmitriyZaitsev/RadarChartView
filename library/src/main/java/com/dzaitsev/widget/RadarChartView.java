@@ -13,6 +13,7 @@ import android.view.View;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import static android.graphics.Color.BLACK;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Path.Direction.CW;
 import static com.dzaitsev.widget.Utils.createPaint;
@@ -33,17 +34,18 @@ public class RadarChartView extends View {
   private final Rect                         mRect      = new Rect();
   private final Path                         mPath      = new Path();
   private final TextPaint                    mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+  private final Paint                        mPaint     = createPaint(BLACK);
 
-  private int     mStartColor;
-  private int     mEndColor;
-  private int     mAxisColor;
-  private float   mAxisMax;
-  private float   mAxisTick;
-  private Paint   mAxisPaint;
-  private int     mCenterX;
-  private int     mCenterY;
-  private Ring[]  mRings;
-  private boolean mCirclesOnly;
+  private int      mStartColor;
+  private int      mEndColor;
+  private int      mAxisColor;
+  private float    mAxisMax;
+  private float    mAxisTick;
+  private int      mCenterX;
+  private int      mCenterY;
+  private Ring[]   mRings;
+  private boolean  mCirclesOnly;
+  private PointF[] mVertices;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -73,7 +75,6 @@ public class RadarChartView extends View {
     mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     values.recycle();
 
-    mAxisPaint = createPaint(mAxisColor);
     mTextPaint.setTextSize(textSize);
     mTextPaint.density = getResources().getDisplayMetrics().density;
 
@@ -82,19 +83,19 @@ public class RadarChartView extends View {
 
   public void addOrReplace(String sector, float value) {
     mSectors.put(sector, value);
-    fillRingsWithPoints();
+    buildVertices();
     invalidate();
   }
 
   public void clearSectors() {
     mSectors.clear();
-    fillRingsWithPoints();
+    buildVertices();
     invalidate();
   }
 
   public void remove(String sector) {
     mSectors.remove(sector);
-    fillRingsWithPoints();
+    buildVertices();
     invalidate();
   }
 
@@ -171,7 +172,7 @@ public class RadarChartView extends View {
     } else {
       drawPolygons(canvas, size);
     }
-    drawAxis(canvas, size);
+    drawAxis(canvas);
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -194,41 +195,41 @@ public class RadarChartView extends View {
     if (ringsCount == 1) {
       mRings[0] = new Ring(mAxisMax, mAxisMax, mStartColor);
     } else {
-      for (int i = 0; i < ringsCount; i++) {
-        if (i == ringsCount - 1) {
-          mRings[i] = new Ring(mAxisMax, mAxisMax - mRings[ringsCount - 2].radius, mEndColor);
-        } else {
-          mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick, gradient(mStartColor, mEndColor, i, ringsCount));
-        }
+      for (int i = 0; i < ringsCount - 1; i++) {
+        mRings[i] = new Ring(mAxisTick * (i + 1), mAxisTick, gradient(mStartColor, mEndColor, i, ringsCount));
       }
+      mRings[ringsCount - 1] = new Ring(mAxisMax, mAxisMax - mRings[ringsCount - 2].radius, mEndColor);
     }
 
-    fillRingsWithPoints();
+    buildVertices();
   }
 
   private void calculateCenter() {
     mCenterX = (getRight() - getLeft()) / 2 + getPaddingLeft() - getPaddingRight();
     mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
 
-    fillRingsWithPoints();
+    buildVertices();
   }
 
-  private void fillRingsWithPoints() {
+  private void buildVertices() {
+    final int count = mSectors.size();
     for (Ring ring : mRings) {
-      ring.points = createPoints(mSectors.size(), ring.fixedRadius, mCenterX, mCenterY);
+      ring.vertices = createPoints(count, ring.fixedRadius, mCenterX, mCenterY);
     }
+    mVertices = createPoints(count, mAxisMax, mCenterX, mCenterY);
   }
 
-  private void drawAxis(Canvas canvas, int size) {
-    final PointF[] points = createPoints(size, mAxisMax, mCenterX, mCenterY);
+  private void drawAxis(Canvas canvas) {
     final Iterator<String> sectors = mSectors.keySet()
         .iterator();
-    for (final PointF point : points) {
+    mPaint.setColor(mAxisColor);
+    mPaint.setStrokeWidth(1);
+    for (final PointF point : mVertices) {
       mPath.reset();
       mPath.moveTo(mCenterX, mCenterY);
       mPath.lineTo(point.x, point.y);
       mPath.close();
-      canvas.drawPath(mPath, mAxisPaint);
+      canvas.drawPath(mPath, mPaint);
 
       final String title = sectors.next();
       mTextPaint.getTextBounds(title, 0, title.length(), mRect);
@@ -245,14 +246,15 @@ public class RadarChartView extends View {
       mPath.addCircle(mCenterX, mCenterY, ring.fixedRadius, CW);
       mPath.close();
 
-      ring.paint.setStrokeWidth(ring.width + 2);
-      canvas.drawPath(mPath, ring.paint);
+      mPaint.setColor(ring.color);
+      mPaint.setStrokeWidth(ring.width + 2);
+      canvas.drawPath(mPath, mPaint);
     }
   }
 
   private void drawPolygons(Canvas canvas, int size) {
     for (final Ring ring : mRings) {
-      final PointF[] points = ring.points;
+      final PointF[] points = ring.vertices;
       final PointF start = points[0];
 
       mPath.reset();
@@ -264,8 +266,9 @@ public class RadarChartView extends View {
       mPath.lineTo(start.x, start.y);
       mPath.close();
 
-      ring.paint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
-      canvas.drawPath(mPath, ring.paint);
+      mPaint.setColor(ring.color);
+      mPaint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
+      canvas.drawPath(mPath, mPaint);
     }
   }
 
@@ -273,13 +276,13 @@ public class RadarChartView extends View {
     final float width;
     final float radius;
     final float fixedRadius;
-    final Paint paint;
-    PointF[] points;
+    final int   color;
+    PointF[] vertices;
 
     Ring(float radius, float width, int color) {
       this.radius = radius;
       this.width = width;
-      paint = createPaint(color);
+      this.color = color;
       fixedRadius = radius - width / 2;
     }
 
