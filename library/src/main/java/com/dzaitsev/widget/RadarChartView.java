@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
@@ -21,6 +22,7 @@ import static com.dzaitsev.widget.Utils.createPoints;
 import static com.dzaitsev.widget.Utils.gradient;
 import static java.lang.Math.PI;
 import static java.lang.Math.cos;
+import static java.lang.Math.max;
 import static java.lang.Math.min;
 
 /**
@@ -45,6 +47,7 @@ public class RadarChartView extends View {
   private int      mCenterY;
   private Ring[]   mRings;
   private boolean  mCirclesOnly;
+  private boolean  mAutoSize;
   private PointF[] mVertices;
 
   public RadarChartView(Context context) {
@@ -73,6 +76,7 @@ public class RadarChartView extends View {
     mAxisTick = values.getFloat(R.styleable.RadarChartView_axisTick, 5);
     final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 15);
     mCirclesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
+    mAutoSize = values.getBoolean(R.styleable.RadarChartView_autoSize, true);
     values.recycle();
 
     mTextPaint.setTextSize(textSize);
@@ -83,20 +87,17 @@ public class RadarChartView extends View {
 
   public void addOrReplace(String sector, float value) {
     mSectors.put(sector, value);
-    buildVertices();
-    invalidate();
+    onSectorsChanged();
   }
 
   public void clearSectors() {
     mSectors.clear();
-    buildVertices();
-    invalidate();
+    onSectorsChanged();
   }
 
   public void remove(String sector) {
     mSectors.remove(sector);
-    buildVertices();
-    invalidate();
+    onSectorsChanged();
   }
 
   public int getAxisColor() {
@@ -113,9 +114,8 @@ public class RadarChartView extends View {
   }
 
   public void setAxisMax(float axisMax) {
-    mAxisMax = axisMax;
-    buildRings();
-    invalidate();
+    setAutoSize(false);
+    setAxisMaxInternal(axisMax);
   }
 
   public float getAxisTick() {
@@ -156,6 +156,18 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public boolean isAutoSize() {
+    return mAutoSize;
+  }
+
+  public void setAutoSize(boolean autoSize) {
+    mAutoSize = autoSize;
+
+    if (mAutoSize) {
+      setAxisMaxInternal(Collections.max(mSectors.values()));
+    }
+  }
+
   public void setTextSize(float textSize) {
     mTextPaint.setTextSize(textSize);
     invalidate();
@@ -189,7 +201,7 @@ public class RadarChartView extends View {
   private void buildRings() {
     final float fParts = mAxisMax / mAxisTick;
     final int iParts = (int) fParts;
-    final int ringsCount = iParts + (fParts - iParts > 0 ? 1 : 0);
+    final int ringsCount = max(iParts + (fParts - iParts > 0 ? 1 : 0), 1);
 
     mRings = new Ring[ringsCount];
     if (ringsCount == 1) {
@@ -270,6 +282,21 @@ public class RadarChartView extends View {
       mPaint.setStrokeWidth((float) (ring.width * cos(PI / size)) + 2);
       canvas.drawPath(mPath, mPaint);
     }
+  }
+
+  private void onSectorsChanged() {
+    if (mAutoSize && !mSectors.isEmpty()) {
+      setAxisMaxInternal(Collections.max(mSectors.values()));
+    } else {
+      buildVertices();
+      invalidate();
+    }
+  }
+
+  private void setAxisMaxInternal(float axisMax) {
+    mAxisMax = axisMax;
+    buildRings();
+    invalidate();
   }
 
   private static class Ring {

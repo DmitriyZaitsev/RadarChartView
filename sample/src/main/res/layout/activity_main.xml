@@ -19,18 +19,18 @@
     android:background="#fff"
     android:padding="30dp"
     app:axisColor="#22737b"
-    app:textSize="12sp"
     app:axisMax="280"
     app:axisTick="90"
     app:endColor="#c3e3e5"
-    app:startColor="#5f9ca1" />
+    app:startColor="#5f9ca1"
+    app:textSize="12sp" />
 
   <SeekBar
     android:id="@+id/parts"
     style="@style/Widget.AppCompat.SeekBar.Discrete"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:max="30"
+    android:max="14"
     android:progress="5" />
 
   <SeekBar
@@ -42,8 +42,15 @@
     android:progress="5" />
 
   <CheckBox
-    android:id="@+id/checkBox"
+    android:id="@+id/circlesOnly"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Circles only" />
+
+  <CheckBox
+    android:id="@+id/autoSize"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:checked="true"
+    android:text="Autosize" />
 </LinearLayout>

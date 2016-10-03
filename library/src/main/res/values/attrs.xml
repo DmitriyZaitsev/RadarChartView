@@ -9,5 +9,6 @@
     <attr name="axisTick" format="float" />
     <attr name="textSize" format="dimension" />
     <attr name="circlesOnly" format="boolean" />
+    <attr name="autoSize" format="boolean" />
   </declare-styleable>
 </resources>
