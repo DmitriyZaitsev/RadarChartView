@@ -15,9 +15,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import static android.graphics.Color.BLACK;
+import static android.graphics.Color.MAGENTA;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Path.Direction.CW;
 import static com.dzaitsev.widget.Utils.createPaint;
+import static com.dzaitsev.widget.Utils.createPoint;
 import static com.dzaitsev.widget.Utils.createPoints;
 import static com.dzaitsev.widget.Utils.gradient;
 import static java.lang.Math.PI;
@@ -51,6 +53,7 @@ public class RadarChartView extends View {
   private boolean  mCirclesOnly;
   private boolean  mAutoSize;
   private PointF[] mVertices;
+  private float    mRatio;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -190,6 +193,7 @@ public class RadarChartView extends View {
     } else {
       drawPolygons(canvas, count);
     }
+    drawValues(canvas);
     drawAxis(canvas);
   }
 
@@ -240,9 +244,9 @@ public class RadarChartView extends View {
 
   private void calculateRatio() {
     float distance = min(getWidth() - getPaddingRight() - getPaddingLeft(), getHeight() - getPaddingBottom() - getPaddingTop()) * .5F;
-    final float ratio = distance > 0 ? distance / mAxisMax : 1;
-    mAxisMaxInternal = mAxisMax * ratio;
-    mAxisTickInternal = mAxisTick * ratio;
+    mRatio = distance > 0 ? distance / mAxisMax : 1;
+    mAxisMaxInternal = mAxisMax * mRatio;
+    mAxisTickInternal = mAxisTick * mRatio;
   }
 
   private void drawAxis(Canvas canvas) {
@@ -296,6 +300,32 @@ public class RadarChartView extends View {
       mPaint.setStrokeWidth((float) (ring.width * cos(PI / count)) + 2);
       canvas.drawPath(mPath, mPaint);
     }
+  }
+
+  private void drawValues(Canvas canvas) {
+    mPaint.setColor(MAGENTA);
+    mPaint.setStrokeWidth(5);
+    mPath.reset();
+
+    Float[] values = new Float[mAxis.size()];
+    values = mAxis.values()
+        .toArray(values);
+    final int count = values.length;
+    if (count > 0) {
+      final PointF first = createPoint(values[0] * mRatio, -PI / 2, mCenterX, mCenterY);
+      if (count == 1) {
+        mPath.moveTo(mCenterX, mCenterY);
+      } else {
+        mPath.moveTo(first.x, first.y);
+        for (int i = 1; i < count; i++) {
+          final PointF point = createPoint(values[i] * mRatio, (2 * PI / count) * i - PI / 2, mCenterX, mCenterY);
+          mPath.lineTo(point.x, point.y);
+        }
+      }
+      mPath.lineTo(first.x, first.y);
+    }
+    mPath.close();
+    canvas.drawPath(mPath, mPaint);
   }
 
   private void onAxisChanged() {
