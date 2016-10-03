@@ -28,12 +28,16 @@ final class Utils {
     return start + (end - start) / size * factor;
   }
 
+  @NonNull static PointF createPoint(float radius, double alpha, float x0, float y0) {
+    return new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
+  }
+
   @NonNull static PointF[] createPoints(int amount, float radius, float x0, float y0) {
     final PointF[] points = new PointF[amount];
     final double angle = 2 * PI / amount;
     for (int i = 0; i < amount; i++) {
       final double alpha = angle * i - PI / 2;
-      points[i] = new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
+      points[i] = createPoint(radius, alpha, x0, y0);
     }
     return points;
   }
