@@ -13,6 +13,7 @@ import android.view.View;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.parseColor;
@@ -24,6 +25,7 @@ import static com.dzaitsev.widget.Utils.createPointFs;
 import static com.dzaitsev.widget.Utils.gradient;
 import static com.dzaitsev.widget.Utils.mutatePaint;
 import static java.lang.Math.PI;
+import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -36,6 +38,7 @@ import static java.lang.Math.min;
  */
 public class RadarChartView extends View {
   private final LinkedHashMap<String, Float> mAxis      = new LinkedHashMap<>();
+  private final Map<String, Float>           mReadOnly  = Collections.unmodifiableMap(mAxis);
   private final Rect                         mRect      = new Rect();
   private final Path                         mPath      = new Path();
   private final TextPaint                    mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -46,9 +49,7 @@ public class RadarChartView extends View {
   private int      mAxisColor;
   private int      mGraphColor;
   private float    mAxisMax;
-  private float    mAxisMaxInternal;
   private float    mAxisTick;
-  private float    mAxisTickInternal;
   private float    mAxisWidth;
   private float    mGraphWidth;
   private int      mGraphStyle;
@@ -58,7 +59,6 @@ public class RadarChartView extends View {
   private boolean  mCirclesOnly;
   private boolean  mAutoSize;
   private PointF[] mVertices;
-  private float    mRatio;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -93,12 +93,8 @@ public class RadarChartView extends View {
     mGraphStyle = values.getInt(R.styleable.RadarChartView_graphStyle, STROKE.ordinal());
     values.recycle();
 
-    mAxisMaxInternal = mAxisMax;
-    mAxisTickInternal = mAxisTick;
     mTextPaint.setTextSize(textSize);
     mTextPaint.density = getResources().getDisplayMetrics().density;
-
-    buildRings();
   }
 
   public void addOrReplace(String axis, float value) {
@@ -108,6 +104,16 @@ public class RadarChartView extends View {
 
   public void clearAxis() {
     mAxis.clear();
+    onAxisChanged();
+  }
+
+  public Map<String, Float> getAxis() {
+    return mReadOnly;
+  }
+
+  public void setAxis(Map<String, Float> axis) {
+    mAxis.clear();
+    mAxis.putAll(axis);
     onAxisChanged();
   }
 
@@ -135,7 +141,6 @@ public class RadarChartView extends View {
 
   public void setAxisTick(float axisTick) {
     mAxisTick = axisTick;
-    calculateRatio();
     buildRings();
     invalidate();
   }
@@ -202,7 +207,7 @@ public class RadarChartView extends View {
   public void setAutoSize(boolean autoSize) {
     mAutoSize = autoSize;
 
-    if (mAutoSize) {
+    if (mAutoSize && !mAxis.isEmpty()) {
       setAxisMaxInternal(Collections.max(mAxis.values()));
     }
   }
@@ -228,8 +233,8 @@ public class RadarChartView extends View {
 
   @Override protected void onDraw(Canvas canvas) {
     if (isInEditMode()) {
-      calculateRatio();
       calculateCenter();
+      buildVertices();
     }
 
     final int count = mAxis.size();
@@ -238,35 +243,43 @@ public class RadarChartView extends View {
     } else {
       drawPolygons(canvas, count);
     }
-    drawValues(canvas);
+    drawValues(canvas, count);
     drawAxis(canvas);
   }
 
   @Override protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    final int width = getMeasuredWidth();
-    final int height = getMeasuredHeight();
+    final int width = MeasureSpec.getSize(widthMeasureSpec);
+    final int height = MeasureSpec.getSize(heightMeasureSpec);
     if (width != height) {
-      final int size = min(width, height);
-      setMeasuredDimension(size, size);
+      final int size = MeasureSpec.makeMeasureSpec(min(width, height), MeasureSpec.EXACTLY);
+      super.onMeasure(size, size);
     }
-    calculateRatio();
     calculateCenter();
+    buildRings();
+  }
+
+  private float axisMax() {
+    return min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())
+        * .5F;
+  }
+
+  private float axisTick() {
+    return mAxisTick * ratio();
   }
 
   private void buildRings() {
-    final float fParts = mAxisMaxInternal / mAxisTickInternal;
-    final int iParts = (int) fParts;
-    final int ringsCount = max(iParts + (fParts - iParts > 0 ? 1 : 0), 1);
+    final float axisTick = axisTick();
+    final float axisMax = axisMax();
+    final int ringsCount = (int) max(ceil(axisMax / axisTick), 1);
 
     mRings = new Ring[ringsCount];
     if (ringsCount == 1) {
-      mRings[0] = new Ring(mAxisMaxInternal, mAxisMaxInternal, mStartColor);
+      mRings[0] = new Ring(axisMax, axisMax, mStartColor);
     } else {
-      for (int i = 0; i < ringsCount - 1; i++) {
-        mRings[i] = new Ring(mAxisTickInternal * (i + 1), mAxisTickInternal, gradient(mStartColor, mEndColor, i, ringsCount));
+      for (int i = 0; i < ringsCount; i++) {
+        mRings[i] = new Ring(axisTick * (i + 1), axisTick, gradient(mStartColor, mEndColor, i, ringsCount));
       }
-      mRings[ringsCount - 1] = new Ring(mAxisMaxInternal, mAxisMaxInternal - mRings[ringsCount - 2].radius, mEndColor);
+      mRings[ringsCount - 1] = new Ring(axisMax, axisMax - mRings[ringsCount - 2].radius, mEndColor);
     }
 
     buildVertices();
@@ -277,26 +290,16 @@ public class RadarChartView extends View {
     for (Ring ring : mRings) {
       ring.vertices = createPointFs(count, ring.fixedRadius, mCenterX, mCenterY);
     }
-    mVertices = createPointFs(count, mAxisMaxInternal, mCenterX, mCenterY);
+    mVertices = createPointFs(count, axisMax(), mCenterX, mCenterY);
   }
 
   private void calculateCenter() {
-    mCenterX = (getRight() - getLeft()) / 2 + getPaddingLeft() - getPaddingRight();
-    mCenterY = (getBottom() - getTop()) / 2 + getPaddingTop() - getPaddingBottom();
-
-    buildVertices();
-  }
-
-  private void calculateRatio() {
-    float distance = min(getWidth() - getPaddingRight() - getPaddingLeft(), getHeight() - getPaddingBottom() - getPaddingTop()) * .5F;
-    mRatio = distance > 0 ? distance / mAxisMax : 1;
-    mAxisMaxInternal = mAxisMax * mRatio;
-    mAxisTickInternal = mAxisTick * mRatio;
+    mCenterX = getMeasuredWidth() / 2 + getPaddingLeft() - getPaddingRight();
+    mCenterY = getMeasuredHeight() / 2 + getPaddingTop() - getPaddingBottom();
   }
 
   private void drawAxis(Canvas canvas) {
-    final Iterator<String> axis = mAxis.keySet()
-        .iterator();
+    final Iterator<String> axis = (mAxis.keySet()).iterator();
     mutatePaint(mPaint, mAxisColor, mAxisWidth, STROKE);
     for (final PointF point : mVertices) {
       mPath.reset();
@@ -344,21 +347,24 @@ public class RadarChartView extends View {
     }
   }
 
-  private void drawValues(Canvas canvas) {
+  private void drawValues(Canvas canvas, int count) {
+    if (count == 0) {
+      return;
+    }
+
     mPath.reset();
 
-    Float[] values = new Float[mAxis.size()];
-    values = mAxis.values()
-        .toArray(values);
-    final int count = values.length;
+    Float[] values = new Float[count];
+    values = (mAxis.values()).toArray(values);
     if (count > 0) {
-      final PointF first = createPointF(values[0] * mRatio, -PI / 2, mCenterX, mCenterY);
+      final float ratio = ratio();
+      final PointF first = createPointF(values[0] * ratio, -PI / 2, mCenterX, mCenterY);
       if (count == 1) {
         mPath.moveTo(mCenterX, mCenterY);
       } else {
         mPath.moveTo(first.x, first.y);
         for (int i = 1; i < count; i++) {
-          final PointF point = createPointF(values[i] * mRatio, (2 * PI / count) * i - PI / 2, mCenterX, mCenterY);
+          final PointF point = createPointF(values[i] * ratio, (2 * PI / count) * i - PI / 2, mCenterX, mCenterY);
           mPath.lineTo(point.x, point.y);
         }
       }
@@ -366,7 +372,7 @@ public class RadarChartView extends View {
     }
     mPath.close();
 
-    mutatePaint(mPaint,mGraphColor, mGraphWidth, Paint.Style.values()[mGraphStyle]);
+    mutatePaint(mPaint, mGraphColor, mGraphWidth, Paint.Style.values()[mGraphStyle]);
     canvas.drawPath(mPath, mPaint);
   }
 
@@ -379,9 +385,13 @@ public class RadarChartView extends View {
     }
   }
 
+  private float ratio() {
+    final float axisMax = axisMax();
+    return axisMax > 0 ? axisMax / mAxisMax : 0;
+  }
+
   private void setAxisMaxInternal(float axisMax) {
     mAxisMax = axisMax;
-    calculateRatio();
     buildRings();
     invalidate();
   }

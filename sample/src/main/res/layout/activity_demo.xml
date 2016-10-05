@@ -10,9 +10,9 @@
   android:paddingLeft="@dimen/activity_horizontal_margin"
   android:paddingRight="@dimen/activity_horizontal_margin"
   android:paddingTop="@dimen/activity_vertical_margin"
-  tools:context="com.dzaitsev.radarchartview.MainActivity">
+  tools:context="com.dzaitsev.radarchartview.DemoActivity">
 
-  <com.dzaitsev.radarchartview.ChartView
+  <com.dzaitsev.widget.RadarChartView
     android:id="@+id/radar_chart"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -20,14 +20,14 @@
     android:padding="30dp"
     app:axisColor="#22737b"
     app:axisMax="280"
-    app:axisTick="90"
+    app:axisTick="66"
     app:endColor="#c3e3e5"
     app:graphStyle="stroke"
     app:startColor="#5f9ca1"
     app:textSize="12sp" />
 
   <SeekBar
-    android:id="@+id/parts"
+    android:id="@+id/axisTick"
     style="@style/Widget.AppCompat.SeekBar.Discrete"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -35,11 +35,11 @@
     android:progress="5" />
 
   <SeekBar
-    android:id="@+id/sectors"
+    android:id="@+id/axis"
     style="@style/Widget.AppCompat.SeekBar.Discrete"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:max="12"
+    android:max="11"
     android:progress="5" />
 
   <CheckBox
@@ -54,4 +54,14 @@
     android:layout_height="wrap_content"
     android:checked="true"
     android:text="Autosize" />
+
+  <Spinner
+    android:id="@+id/spinner"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
+
+  <SeekBar
+    android:id="@+id/value"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" />
 </LinearLayout>
