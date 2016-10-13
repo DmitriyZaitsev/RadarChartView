@@ -58,6 +58,9 @@ public class RadarChartView extends View {
   private boolean autoSize;
   private boolean smoothGradient;
   private float[] vertices;
+  private float   ratio;
+  private float   axisMaxInternal;
+  private float   axisTickInternal;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -141,6 +144,8 @@ public class RadarChartView extends View {
 
   public final void setAxisTick(float axisTick) {
     this.axisTick = axisTick;
+    calcAxisTickInternal();
+
     buildRings();
     invalidate();
   }
@@ -240,12 +245,17 @@ public class RadarChartView extends View {
     invalidate();
   }
 
-  @Override protected void onDraw(Canvas canvas) {
-    if (isInEditMode()) {
-      calculateCenter();
-      buildVertices();
-    }
+  @Override protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    calculateCenter();
+    axisMaxInternal =
+        max(0, min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop()))
+            * 0.5F;
+    calcRatio();
+    calcAxisTickInternal();
+    buildRings();
+  }
 
+  @Override protected void onDraw(Canvas canvas) {
     final int count = axis.size();
     if (count < 3 || circlesOnly) {
       drawCircles(canvas);
@@ -263,36 +273,23 @@ public class RadarChartView extends View {
       final int size = MeasureSpec.makeMeasureSpec(min(width, height), MeasureSpec.EXACTLY);
       super.onMeasure(size, size);
     }
-    calculateCenter();
-    buildRings();
-  }
-
-  private float axisMax() {
-    return max(0,
-        min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())) * 0.5F;
-  }
-
-  private float axisTick() {
-    return axisTick * ratio();
   }
 
   private void buildRings() {
-    final float axisTick = axisTick();
-    final float axisMax = axisMax();
-    @SuppressWarnings("NumericCastThatLosesPrecision")
-    final int ringsCount = (int) max(ceil(axisMax / axisTick), 1);
+    @SuppressWarnings("NumericCastThatLosesPrecision") //
+    final int ringsCount = (int) max(ceil(axisMaxInternal / axisTickInternal), 1);
     if (ringsCount == 0) {
       return;
     }
 
     rings = new Ring[ringsCount];
     if (ringsCount == 1) {
-      rings[0] = new Ring(axisMax, axisMax, startColor);
+      rings[0] = new Ring(axisMaxInternal, axisMaxInternal, startColor);
     } else {
       for (int i = 0; i < ringsCount; i++) {
-        rings[i] = new Ring(axisTick * (i + 1), axisTick, gradient(startColor, endColor, i, ringsCount));
+        rings[i] = new Ring(axisTickInternal * (i + 1), axisTickInternal, gradient(startColor, endColor, i, ringsCount));
       }
-      rings[ringsCount - 1] = new Ring(axisMax, axisMax - rings[ringsCount - 2].radius, endColor);
+      rings[ringsCount - 1] = new Ring(axisMaxInternal, axisMaxInternal - rings[ringsCount - 2].radius, endColor);
     }
 
     buildVertices();
@@ -303,7 +300,15 @@ public class RadarChartView extends View {
     for (Ring ring : rings) {
       ring.vertices = createPoints(count, ring.fixedRadius, centerX, centerY);
     }
-    vertices = createPoints(count, axisMax(), centerX, centerY);
+    vertices = createPoints(count, axisMaxInternal, centerX, centerY);
+  }
+
+  private void calcAxisTickInternal() {
+    axisTickInternal = axisTick * ratio;
+  }
+
+  private void calcRatio() {
+    ratio = axisMaxInternal > 0 ? axisMaxInternal / axisMax : 1;
   }
 
   private void calculateCenter() {
@@ -312,7 +317,8 @@ public class RadarChartView extends View {
   }
 
   private void drawAxis(Canvas canvas) {
-    final Iterator<String> axisNames = axis.keySet().iterator();
+    final Iterator<String> axisNames = axis.keySet()
+        .iterator();
     mutatePaint(paint, axisColor, axisWidth, STROKE);
     final int length = vertices.length;
     for (int i = 0; i < length; i += 2) {
@@ -367,9 +373,9 @@ public class RadarChartView extends View {
     path.reset();
 
     Float[] values = new Float[count];
-    values = axis.values().toArray(values);
+    values = axis.values()
+        .toArray(values);
     if (count > 0) {
-      final float ratio = ratio();
       final float[] first = createPoint(values[0] * ratio, -PI / 2, centerX, centerY);
       if (count == 1) {
         path.moveTo(centerX, centerY);
@@ -397,13 +403,10 @@ public class RadarChartView extends View {
     }
   }
 
-  private float ratio() {
-    final float axisMax = axisMax();
-    return axisMax > 0 ? axisMax / this.axisMax : 1;
-  }
-
   private void setAxisMaxInternal(float axisMax) {
     this.axisMax = axisMax;
+    calcRatio();
+    calcAxisTickInternal();
     buildRings();
     invalidate();
   }
