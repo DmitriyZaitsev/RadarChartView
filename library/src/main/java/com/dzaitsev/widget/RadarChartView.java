@@ -18,17 +18,16 @@ import java.util.Map;
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Paint.Style.STROKE;
-import static android.graphics.Path.Direction.CW;
 import static com.dzaitsev.widget.Utils.createPaint;
 import static com.dzaitsev.widget.Utils.createPointF;
 import static com.dzaitsev.widget.Utils.createPointFs;
 import static com.dzaitsev.widget.Utils.gradient;
 import static com.dzaitsev.widget.Utils.mutatePaint;
-import static java.lang.Math.PI;
-import static java.lang.Math.ceil;
-import static java.lang.Math.cos;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+import static java.lang.StrictMath.PI;
+import static java.lang.StrictMath.ceil;
+import static java.lang.StrictMath.cos;
+import static java.lang.StrictMath.max;
+import static java.lang.StrictMath.min;
 
 /**
  * ~ ~ ~ ~ Description ~ ~ ~ ~
