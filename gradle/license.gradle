@@ -13,31 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+apply plugin: 'com.github.hierynomus.license'
 
-import nl.javadude.gradle.plugins.license.License
-
-buildscript {
-  repositories {
-    maven { url "https://plugins.gradle.org/m2/" }
+license {
+  header = rootProject.file('HEADER.txt')
+  strictCheck = true
+  ignoreFailures = true
+  mapping {
+    java = 'SLASHSTAR_STYLE'
+    groovy = 'SLASHSTAR_STYLE'
   }
-  dependencies {
-    classpath 'com.android.tools.build:gradle:2.2.1'
-    classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
-  }
-}
-
-allprojects {
-  repositories {
-    jcenter()
-  }
-  apply from: rootProject.file('gradle/license.gradle')
-}
-
-task clean(type: Delete) {
-  delete rootProject.buildDir
-}
-
-
-task licenseFormatEverything(type: License) {
-  source = fileTree(dir: projectDir).include(["**/*.gradle", "**/*.properties", "**/*.xml"])
+  ext.year = Calendar.getInstance().get(Calendar.YEAR)
+  ext.name = POM_DEVELOPER_NAME
 }
