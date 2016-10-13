@@ -329,13 +329,8 @@ public class RadarChartView extends View {
 
   private void drawCircles(Canvas canvas) {
     for (final Ring ring : mRings) {
-      mPath.reset();
-      mPath.moveTo(mCenterX, mCenterY);
-      mPath.addCircle(mCenterX, mCenterY, ring.fixedRadius, CW);
-      mPath.close();
-
       mutatePaint(mPaint, ring.color, ring.width + 2, STROKE);
-      canvas.drawPath(mPath, mPaint);
+      canvas.drawCircle(mCenterX, mCenterY, ring.fixedRadius, mPaint);
     }
   }
 
