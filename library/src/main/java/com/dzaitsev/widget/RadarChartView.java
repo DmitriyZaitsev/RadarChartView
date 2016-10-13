@@ -34,6 +34,7 @@ import static java.lang.StrictMath.min;
  * @author Dmytro Zaitsev
  * @since 2016-Sep-28, 14:15
  */
+@SuppressWarnings("ClassWithTooManyFields")
 public class RadarChartView extends View {
   private final LinkedHashMap<String, Float> axis      = new LinkedHashMap<>();
   private final Rect                         rect      = new Rect();
@@ -96,114 +97,114 @@ public class RadarChartView extends View {
     textPaint.density = getResources().getDisplayMetrics().density;
   }
 
-  public void addOrReplace(String axisName, float value) {
+  public final void addOrReplace(String axisName, float value) {
     axis.put(axisName, value);
     onAxisChanged();
   }
 
-  public void clearAxis() {
+  public final void clearAxis() {
     axis.clear();
     onAxisChanged();
   }
 
-  public Map<String, Float> getAxis() {
+  public final Map<String, Float> getAxis() {
     return Collections.unmodifiableMap(axis);
   }
 
-  public void setAxis(Map<String, Float> axis) {
+  public final void setAxis(Map<String, Float> axis) {
     this.axis.clear();
     this.axis.putAll(axis);
     onAxisChanged();
   }
 
-  public int getAxisColor() {
+  public final int getAxisColor() {
     return axisColor;
   }
 
-  public void setAxisColor(int axisColor) {
+  public final void setAxisColor(int axisColor) {
     this.axisColor = axisColor;
     invalidate();
   }
 
-  public float getAxisMax() {
+  public final float getAxisMax() {
     return axisMax;
   }
 
-  public void setAxisMax(float axisMax) {
+  public final void setAxisMax(float axisMax) {
     setAutoSize(false);
     setAxisMaxInternal(axisMax);
   }
 
-  public float getAxisTick() {
+  public final float getAxisTick() {
     return axisTick;
   }
 
-  public void setAxisTick(float axisTick) {
+  public final void setAxisTick(float axisTick) {
     this.axisTick = axisTick;
     buildRings();
     invalidate();
   }
 
-  public float getAxisWidth() {
+  public final float getAxisWidth() {
     return axisWidth;
   }
 
-  public void setAxisWidth(float axisWidth) {
+  public final void setAxisWidth(float axisWidth) {
     this.axisWidth = axisWidth;
     invalidate();
   }
 
-  public int getEndColor() {
+  public final int getEndColor() {
     return endColor;
   }
 
-  public void setEndColor(int endColor) {
+  public final void setEndColor(int endColor) {
     this.endColor = endColor;
     invalidate();
     invalidate();
   }
 
-  public int getGraphColor() {
+  public final int getGraphColor() {
     return graphColor;
   }
 
-  public void setGraphColor(int graphColor) {
+  public final void setGraphColor(int graphColor) {
     this.graphColor = graphColor;
     invalidate();
   }
 
-  public int getGraphStyle() {
+  public final int getGraphStyle() {
     return graphStyle;
   }
 
-  public void setGraphStyle(int graphStyle) {
+  public final void setGraphStyle(int graphStyle) {
     this.graphStyle = graphStyle;
     invalidate();
   }
 
-  public float getGraphWidth() {
+  public final float getGraphWidth() {
     return graphWidth;
   }
 
-  public void setGraphWidth(float graphWidth) {
+  public final void setGraphWidth(float graphWidth) {
     this.graphWidth = graphWidth;
     invalidate();
   }
 
-  public int getStartColor() {
+  public final int getStartColor() {
     return startColor;
   }
 
-  public void setStartColor(int startColor) {
+  public final void setStartColor(int startColor) {
     this.startColor = startColor;
     invalidate();
   }
 
-  public boolean isAutoSize() {
+  public final boolean isAutoSize() {
     return autoSize;
   }
 
-  public void setAutoSize(boolean autoSize) {
+  public final void setAutoSize(boolean autoSize) {
     this.autoSize = autoSize;
 
     if (autoSize && !axis.isEmpty()) {
@@ -211,30 +212,30 @@ public class RadarChartView extends View {
     }
   }
 
-  public boolean isCirclesOnly() {
+  public final boolean isCirclesOnly() {
     return circlesOnly;
   }
 
-  public void setCirclesOnly(boolean circlesOnly) {
+  public final void setCirclesOnly(boolean circlesOnly) {
     this.circlesOnly = circlesOnly;
     invalidate();
   }
 
-  public boolean isSmoothGradient() {
+  public final boolean isSmoothGradient() {
     return smoothGradient;
   }
 
-  public void setSmoothGradient(boolean smoothGradient) {
+  public final void setSmoothGradient(boolean smoothGradient) {
     this.smoothGradient = smoothGradient;
     invalidate();
   }
 
-  public void remove(String axisName) {
+  public final void remove(String axisName) {
     axis.remove(axisName);
     onAxisChanged();
   }
 
-  public void setTextSize(float textSize) {
+  public final void setTextSize(float textSize) {
     textPaint.setTextSize(textSize);
     invalidate();
   }
@@ -268,7 +269,7 @@ public class RadarChartView extends View {
 
   private float axisMax() {
     return max(0,
-        min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())) * .5F;
+        min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())) * 0.5F;
   }
 
   private float axisTick() {
@@ -278,6 +279,7 @@ public class RadarChartView extends View {
   private void buildRings() {
     final float axisTick = axisTick();
     final float axisMax = axisMax();
+    @SuppressWarnings("NumericCastThatLosesPrecision")
     final int ringsCount = (int) max(ceil(axisMax / axisTick), 1);
     if (ringsCount == 0) {
       return;
@@ -305,14 +307,15 @@ public class RadarChartView extends View {
   }
 
   private void calculateCenter() {
-    centerX = getMeasuredWidth() / 2 + getPaddingLeft() - getPaddingRight();
-    centerY = getMeasuredHeight() / 2 + getPaddingTop() - getPaddingBottom();
+    centerX = (getMeasuredWidth() >> 1) + getPaddingLeft() - getPaddingRight();
+    centerY = (getMeasuredHeight() >> 1) + getPaddingTop() - getPaddingBottom();
   }
 
   private void drawAxis(Canvas canvas) {
-    final Iterator<String> axisNames = (axis.keySet()).iterator();
+    final Iterator<String> axisNames = axis.keySet().iterator();
     mutatePaint(paint, axisColor, axisWidth, STROKE);
-    for (int i = 0; i < vertices.length; i += 2) {
+    final int length = vertices.length;
+    for (int i = 0; i < length; i += 2) {
       path.reset();
       path.moveTo(centerX, centerY);
       final float pointX = vertices[i];
@@ -350,6 +353,7 @@ public class RadarChartView extends View {
       }
       path.close();
 
+      //noinspection NumericCastThatLosesPrecision
       mutatePaint(paint, ring.color, (float) (ring.width * cos(PI / count)) + 2, STROKE);
       canvas.drawPath(path, paint);
     }
@@ -363,7 +367,7 @@ public class RadarChartView extends View {
     path.reset();
 
     Float[] values = new Float[count];
-    values = (axis.values()).toArray(values);
+    values = axis.values().toArray(values);
     if (count > 0) {
       final float ratio = ratio();
       final float[] first = createPoint(values[0] * ratio, -PI / 2, centerX, centerY);
@@ -395,7 +399,7 @@ public class RadarChartView extends View {
 
   private float ratio() {
     final float axisMax = axisMax();
-    return axisMax > 0 ? axisMax / this.axisMax : 0;
+    return axisMax > 0 ? axisMax / this.axisMax : 1;
   }
 
   private void setAxisMaxInternal(float axisMax) {
