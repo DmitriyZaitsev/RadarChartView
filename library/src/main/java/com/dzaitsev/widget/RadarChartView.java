@@ -5,7 +5,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -19,8 +18,8 @@ import static android.graphics.Color.BLACK;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Paint.Style.STROKE;
 import static com.dzaitsev.widget.Utils.createPaint;
-import static com.dzaitsev.widget.Utils.createPointF;
-import static com.dzaitsev.widget.Utils.createPointFs;
+import static com.dzaitsev.widget.Utils.createPoint;
+import static com.dzaitsev.widget.Utils.createPoints;
 import static com.dzaitsev.widget.Utils.gradient;
 import static com.dzaitsev.widget.Utils.mutatePaint;
 import static java.lang.StrictMath.PI;
@@ -43,22 +42,22 @@ public class RadarChartView extends View {
   private final TextPaint                    mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
   private final Paint                        mPaint     = createPaint(BLACK);
 
-  private int      mStartColor;
-  private int      mEndColor;
-  private int      mAxisColor;
-  private int      mGraphColor;
-  private float    mAxisMax;
-  private float    mAxisTick;
-  private float    mAxisWidth;
-  private float    mGraphWidth;
-  private int      mGraphStyle;
-  private int      mCenterX;
-  private int      mCenterY;
-  private Ring[]   mRings;
-  private boolean  mCirclesOnly;
-  private boolean  mAutoSize;
-  private boolean  mSmoothGradient;
-  private PointF[] mVertices;
+  private int     mStartColor;
+  private int     mEndColor;
+  private int     mAxisColor;
+  private int     mGraphColor;
+  private float   mAxisMax;
+  private float   mAxisTick;
+  private float   mAxisWidth;
+  private float   mGraphWidth;
+  private int     mGraphStyle;
+  private int     mCenterX;
+  private int     mCenterY;
+  private Ring[]  mRings;
+  private boolean mCirclesOnly;
+  private boolean mAutoSize;
+  private boolean mSmoothGradient;
+  private float[] mVertices;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -269,8 +268,8 @@ public class RadarChartView extends View {
   }
 
   private float axisMax() {
-    return min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())
-        * .5F;
+    return max(0,
+        min(getMeasuredWidth() - getPaddingRight() - getPaddingLeft(), getMeasuredHeight() - getPaddingBottom() - getPaddingTop())) * .5F;
   }
 
   private float axisTick() {
@@ -281,6 +280,9 @@ public class RadarChartView extends View {
     final float axisTick = axisTick();
     final float axisMax = axisMax();
     final int ringsCount = (int) max(ceil(axisMax / axisTick), 1);
+    if (ringsCount == 0) {
+      return;
+    }
 
     mRings = new Ring[ringsCount];
     if (ringsCount == 1) {
@@ -298,9 +300,9 @@ public class RadarChartView extends View {
   private void buildVertices() {
     final int count = mAxis.size();
     for (Ring ring : mRings) {
-      ring.vertices = createPointFs(count, ring.fixedRadius, mCenterX, mCenterY);
+      ring.vertices = createPoints(count, ring.fixedRadius, mCenterX, mCenterY);
     }
-    mVertices = createPointFs(count, axisMax(), mCenterX, mCenterY);
+    mVertices = createPoints(count, axisMax(), mCenterX, mCenterY);
   }
 
   private void calculateCenter() {
@@ -311,17 +313,19 @@ public class RadarChartView extends View {
   private void drawAxis(Canvas canvas) {
     final Iterator<String> axis = (mAxis.keySet()).iterator();
     mutatePaint(mPaint, mAxisColor, mAxisWidth, STROKE);
-    for (final PointF point : mVertices) {
+    for (int i = 0; i < mVertices.length; i += 2) {
       mPath.reset();
       mPath.moveTo(mCenterX, mCenterY);
-      mPath.lineTo(point.x, point.y);
+      final float pointX = mVertices[i];
+      final float pointY = mVertices[i + 1];
+      mPath.lineTo(pointX, pointY);
       mPath.close();
       canvas.drawPath(mPath, mPaint);
 
       final String axisName = axis.next();
       mTextPaint.getTextBounds(axisName, 0, axisName.length(), mRect);
-      float x = point.x > mCenterX ? point.x : point.x - mRect.width();
-      float y = point.y > mCenterY ? point.y + mRect.height() : point.y;
+      final float x = pointX > mCenterX ? pointX : pointX - mRect.width();
+      final float y = pointY > mCenterY ? pointY + mRect.height() : pointY;
       canvas.drawText(axisName, x, y, mTextPaint);
     }
   }
@@ -335,16 +339,16 @@ public class RadarChartView extends View {
 
   private void drawPolygons(Canvas canvas, int count) {
     for (final Ring ring : mRings) {
-      final PointF[] points = ring.vertices;
-      final PointF start = points[0];
+      final float[] points = ring.vertices;
+      final float startX = points[0];
+      final float startY = points[1];
 
       mPath.reset();
-      mPath.moveTo(start.x, start.y);
-      for (int j = 1; j < count; j++) {
-        final PointF to = points[j];
-        mPath.lineTo(to.x, to.y);
+      mPath.moveTo(startX, startY);
+      mPath.setLastPoint(startX, startY);
+      for (int j = 2; j < count + count; j += 2) {
+        mPath.lineTo(points[j], points[j + 1]);
       }
-      mPath.lineTo(start.x, start.y);
       mPath.close();
 
       mutatePaint(mPaint, ring.color, (float) (ring.width * cos(PI / count)) + 2, STROKE);
@@ -363,17 +367,17 @@ public class RadarChartView extends View {
     values = (mAxis.values()).toArray(values);
     if (count > 0) {
       final float ratio = ratio();
-      final PointF first = createPointF(values[0] * ratio, -PI / 2, mCenterX, mCenterY);
+      final float[] first = createPoint(values[0] * ratio, -PI / 2, mCenterX, mCenterY);
       if (count == 1) {
         mPath.moveTo(mCenterX, mCenterY);
       } else {
-        mPath.moveTo(first.x, first.y);
+        mPath.moveTo(first[0], first[1]);
+        mPath.setLastPoint(first[0], first[1]);
         for (int i = 1; i < count; i++) {
-          final PointF point = createPointF(values[i] * ratio, (2 * PI / count) * i - PI / 2, mCenterX, mCenterY);
-          mPath.lineTo(point.x, point.y);
+          final float[] point = createPoint(values[i] * ratio, (2 * PI / count) * i - PI / 2, mCenterX, mCenterY);
+          mPath.lineTo(point[0], point[1]);
         }
       }
-      mPath.lineTo(first.x, first.y);
     }
     mPath.close();
 
@@ -406,7 +410,7 @@ public class RadarChartView extends View {
     final float radius;
     final float fixedRadius;
     final int   color;
-    PointF[] vertices;
+    float[] vertices;
 
     Ring(float radius, float width, int color) {
       this.radius = radius;

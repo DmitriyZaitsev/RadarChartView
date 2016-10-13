@@ -1,7 +1,6 @@
 package com.dzaitsev.widget;
 
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.support.annotation.NonNull;
 
 import static android.graphics.Color.alpha;
@@ -10,9 +9,9 @@ import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
 import static android.graphics.Paint.Style.STROKE;
-import static java.lang.Math.PI;
-import static java.lang.Math.cos;
-import static java.lang.Math.sin;
+import static java.lang.StrictMath.PI;
+import static java.lang.StrictMath.cos;
+import static java.lang.StrictMath.sin;
 
 /**
  * ~ ~ ~ ~ Description ~ ~ ~ ~
@@ -42,20 +41,29 @@ final class Utils {
     return argb(alpha, red, green, blue);
   }
 
-  @NonNull static PointF createPointF(float radius, double alpha, float x0, float y0) {
-    return new PointF((float) (radius * cos(alpha) + x0), (float) (radius * sin(alpha) + y0));
+  @SuppressWarnings("NumericCastThatLosesPrecision") //
+  @NonNull static float[] createPoint(float radius, double alpha, float x0, float y0) {
+    final float[] point = new float[2];
+    point[0] = (float) (radius * cos(alpha) + x0);
+    point[1] = (float) (radius * sin(alpha) + y0);
+    return point;
   }
 
-  @NonNull static PointF[] createPointFs(int count, float radius, float x0, float y0) {
-    final PointF[] points = new PointF[count];
+  @NonNull static float[] createPoints(int count, float radius, float x0, float y0) {
+    final int length = count + count;
+    final float[] points = new float[length];
     final double angle = 2 * PI / count;
-    for (int i = 0; i < count; i++) {
-      final double alpha = angle * i - PI / 2;
-      points[i] = createPointF(radius, alpha, x0, y0);
+    int j = 0;
+    for (int i = 0; i < length; i += 2) {
+      final double alpha = angle * j++ - PI / 2;
+      final float[] point = createPoint(radius, alpha, x0, y0);
+      points[i] = point[0];
+      points[i + 1] = point[1];
     }
     return points;
   }
 
+  @SuppressWarnings("NumericCastThatLosesPrecision") //
   private static int between(int startColor, int endColor, int factor, int steps) {
     final float ratio = (float) factor / steps;
     return (int) (endColor * ratio + startColor * (1 - ratio));
