@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 
     Copyright 2016 Dmytro Zaitsev
 
@@ -38,9 +37,10 @@
     app:axisColor="#22737b"
     app:axisMax="280"
     app:axisTick="66"
-    app:endColor="#c3e3e5"
+    app:chartColor="#C8FF4081"
     app:chartStyle="stroke"
-    app:chartWidth="5dp"
+    app:chartWidth="5"
+    app:endColor="#c3e3e5"
     app:startColor="#5f9ca1"
     app:textSize="12sp" />
 
@@ -60,18 +60,33 @@
     android:max="11"
     android:progress="5" />
 
-  <CheckBox
-    android:id="@+id/circlesOnly"
-    android:layout_width="wrap_content"
+  <LinearLayout
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:text="Circles only" />
+    android:orientation="horizontal">
 
-  <CheckBox
-    android:id="@+id/autoSize"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:checked="true"
-    android:text="Autosize" />
+    <CheckBox
+      android:id="@+id/circlesOnly"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Circles only" />
+
+    <CheckBox
+      android:id="@+id/autoSize"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:checked="true"
+      android:text="Autosize" />
+
+    <CheckBox
+      android:id="@+id/fillStroke"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="Fill/Stroke" />
+  </LinearLayout>
 
   <Spinner
     android:id="@+id/spinner"

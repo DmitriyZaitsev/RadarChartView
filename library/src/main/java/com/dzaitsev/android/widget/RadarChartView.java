@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.support.annotation.IntDef;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -36,11 +37,13 @@ import static java.lang.StrictMath.min;
  */
 @SuppressWarnings("ClassWithTooManyFields")
 public class RadarChartView extends View {
-  private final LinkedHashMap<String, Float> axis      = new LinkedHashMap<>();
-  private final Rect                         rect      = new Rect();
-  private final Path                         path      = new Path();
-  private final TextPaint                    textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-  private final Paint                        paint     = createPaint(BLACK);
+  public static final int                          CHART_STYLE_FILL   = 0;
+  public static final int                          CHART_STYLE_STROKE = 1;
+  private final       LinkedHashMap<String, Float> axis               = new LinkedHashMap<>();
+  private final       Rect                         rect               = new Rect();
+  private final       Path                         path               = new Path();
+  private final       TextPaint                    textPaint          = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+  private final       Paint                        paint              = createPaint(BLACK);
 
   private int     startColor;
   private int     endColor;
@@ -168,13 +171,20 @@ public class RadarChartView extends View {
     invalidate();
   }
 
-  public final int getChartStyle() {
+  @ChartStyle public final int getChartStyle() {
     return chartStyle;
   }
 
-  public final void setChartStyle(int chartStyle) {
-    this.chartStyle = chartStyle;
-    invalidate();
+  public final void setChartStyle(@ChartStyle int chartStyle) {
+    switch (chartStyle) {
+      case CHART_STYLE_FILL:
+      case CHART_STYLE_STROKE:
+        this.chartStyle = chartStyle;
+        invalidate();
+        break;
+      default:
+        throw new IllegalArgumentException("Use RadarChartView.CHART_STYLE_FILL or RadarChartView.CHART_STYLE_STROKE");
+    }
   }
 
   public final float getChartWidth() {
@@ -409,6 +419,10 @@ public class RadarChartView extends View {
     calcAxisTickInternal();
     buildRings();
     invalidate();
+  }
+
+  @IntDef({ CHART_STYLE_FILL, CHART_STYLE_STROKE })
+  public @interface ChartStyle {
   }
 
   private static class Ring {

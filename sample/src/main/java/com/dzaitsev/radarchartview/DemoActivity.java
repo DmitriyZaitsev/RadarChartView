@@ -107,6 +107,11 @@ public class DemoActivity extends AppCompatActivity {
         chartView.setAutoSize(isChecked);
       }
     });
+    ((CompoundButton) findViewById(R.id.fillStroke)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        chartView.setChartStyle(isChecked ? RadarChartView.CHART_STYLE_FILL : RadarChartView.CHART_STYLE_STROKE);
+      }
+    });
 
     updateSeekBars();
   }
