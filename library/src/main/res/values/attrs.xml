@@ -17,5 +17,6 @@
     <attr name="textSize" format="dimension" />
     <attr name="circlesOnly" format="boolean" />
     <attr name="autoSize" format="boolean" />
+    <attr name="smoothGradient" format="boolean" />
   </declare-styleable>
 </resources>

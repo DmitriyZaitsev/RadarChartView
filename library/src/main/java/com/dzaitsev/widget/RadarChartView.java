@@ -58,6 +58,7 @@ public class RadarChartView extends View {
   private Ring[]   mRings;
   private boolean  mCirclesOnly;
   private boolean  mAutoSize;
+  private boolean  mSmoothGradient;
   private PointF[] mVertices;
 
   public RadarChartView(Context context) {
@@ -91,6 +92,7 @@ public class RadarChartView extends View {
     mAxisWidth = values.getFloat(R.styleable.RadarChartView_axisWidth, 1);
     mGraphWidth = values.getFloat(R.styleable.RadarChartView_graphWidth, 3);
     mGraphStyle = values.getInt(R.styleable.RadarChartView_graphStyle, STROKE.ordinal());
+    mSmoothGradient = values.getBoolean(R.styleable.RadarChartView_smoothGradient, false);
     values.recycle();
 
     mTextPaint.setTextSize(textSize);
@@ -218,6 +220,15 @@ public class RadarChartView extends View {
 
   public void setCirclesOnly(boolean circlesOnly) {
     mCirclesOnly = circlesOnly;
+    invalidate();
+  }
+
+  public boolean isSmoothGradient() {
+    return mSmoothGradient;
+  }
+
+  public void setSmoothGradient(boolean smoothGradient) {
+    mSmoothGradient = smoothGradient;
     invalidate();
   }
 
