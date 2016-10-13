@@ -1,7 +1,10 @@
 package com.dzaitsev.android.widget;
 
+import android.content.res.Resources;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 import static android.graphics.Color.alpha;
 import static android.graphics.Color.argb;
@@ -19,6 +22,7 @@ import static java.lang.StrictMath.sin;
  * @author Dmytro Zaitsev
  * @since 2016-Sep-29, 20:32
  */
+@SuppressWarnings("NumericCastThatLosesPrecision") //
 final class Utils {
   @NonNull static Paint createPaint(int color) {
     final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -41,7 +45,7 @@ final class Utils {
     return argb(alpha, red, green, blue);
   }
 
-  @SuppressWarnings("NumericCastThatLosesPrecision") //
+
   @NonNull static float[] createPoint(float radius, double alpha, float x0, float y0) {
     final float[] point = new float[2];
     point[0] = (float) (radius * cos(alpha) + x0);
@@ -63,7 +67,14 @@ final class Utils {
     return points;
   }
 
-  @SuppressWarnings("NumericCastThatLosesPrecision") //
+  static int dp(float dp, DisplayMetrics metrics) {
+    return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, metrics);
+  }
+
+  static int sp(float sp, DisplayMetrics metrics) {
+    return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics);
+  }
+
   private static int between(int startColor, int endColor, int factor, int steps) {
     final float ratio = (float) factor / steps;
     return (int) (endColor * ratio + startColor * (1 - ratio));

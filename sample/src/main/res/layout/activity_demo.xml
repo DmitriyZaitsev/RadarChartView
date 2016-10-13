@@ -36,10 +36,11 @@
     android:padding="30dp"
     app:axisColor="#22737b"
     app:axisMax="280"
-    app:axisTick="66"
+    app:axisTick="75"
+    app:axisWidth="1dp"
     app:chartColor="#C8FF4081"
     app:chartStyle="stroke"
-    app:chartWidth="5"
+    app:chartWidth="3dp"
     app:endColor="#c3e3e5"
     app:startColor="#5f9ca1"
     app:textSize="12sp" />

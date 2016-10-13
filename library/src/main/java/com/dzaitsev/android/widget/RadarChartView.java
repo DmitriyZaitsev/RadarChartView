@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.support.annotation.IntDef;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.view.View;
 import java.util.Collections;
 import java.util.Iterator;
@@ -23,6 +24,8 @@ import static com.dzaitsev.android.widget.Utils.createPoint;
 import static com.dzaitsev.android.widget.Utils.createPoints;
 import static com.dzaitsev.android.widget.Utils.gradient;
 import static com.dzaitsev.android.widget.Utils.mutatePaint;
+import static com.dzaitsev.android.widget.Utils.dp;
+import static com.dzaitsev.android.widget.Utils.sp;
 import static java.lang.StrictMath.PI;
 import static java.lang.StrictMath.ceil;
 import static java.lang.StrictMath.cos;
@@ -50,9 +53,9 @@ public class RadarChartView extends View {
   private int     axisColor;
   private float   axisMax;
   private float   axisTick;
-  private float   axisWidth;
+  private int     axisWidth;
   private int     chartColor;
-  private float   chartWidth;
+  private int     chartWidth;
   private int     chartStyle;
   private int     centerX;
   private int     centerY;
@@ -89,18 +92,19 @@ public class RadarChartView extends View {
     axisColor = values.getColor(R.styleable.RadarChartView_axisColor, BLACK);
     axisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
     axisTick = values.getFloat(R.styleable.RadarChartView_axisTick, axisMax / 5);
-    final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 15);
+    final DisplayMetrics metrics = getResources().getDisplayMetrics();
+    final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, sp(15, metrics));
     circlesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     autoSize = values.getBoolean(R.styleable.RadarChartView_autoSize, true);
-    axisWidth = values.getFloat(R.styleable.RadarChartView_axisWidth, 1);
+    axisWidth = values.getDimensionPixelSize(R.styleable.RadarChartView_axisWidth, dp(1, metrics));
     chartColor = values.getColor(R.styleable.RadarChartView_chartColor, colorAccent);
-    chartWidth = values.getFloat(R.styleable.RadarChartView_chartWidth, 3);
+    chartWidth = values.getDimensionPixelSize(R.styleable.RadarChartView_chartWidth, dp(3, metrics));
     chartStyle = values.getInt(R.styleable.RadarChartView_chartStyle, STROKE.ordinal());
     smoothGradient = values.getBoolean(R.styleable.RadarChartView_smoothGradient, false);
     values.recycle();
 
     textPaint.setTextSize(textSize);
-    textPaint.density = getResources().getDisplayMetrics().density;
+    textPaint.density = metrics.density;
   }
 
   public final void addOrReplace(String axisName, float value) {
@@ -157,7 +161,7 @@ public class RadarChartView extends View {
     return axisWidth;
   }
 
-  public final void setAxisWidth(float axisWidth) {
+  public final void setAxisWidth(int axisWidth) {
     this.axisWidth = axisWidth;
     invalidate();
   }
@@ -191,7 +195,7 @@ public class RadarChartView extends View {
     return chartWidth;
   }
 
-  public final void setChartWidth(float chartWidth) {
+  public final void setChartWidth(int chartWidth) {
     this.chartWidth = chartWidth;
     invalidate();
   }
@@ -400,7 +404,8 @@ public class RadarChartView extends View {
     }
     path.close();
 
-    mutatePaint(paint, chartColor, chartWidth, Paint.Style.values()[chartStyle]);
+    mutatePaint(paint, chartColor, chartStyle == CHART_STYLE_STROKE ? (float) (chartWidth * cos(PI / count)) + 2 : chartWidth,
+        Paint.Style.values()[chartStyle]);
     canvas.drawPath(path, paint);
   }
 
