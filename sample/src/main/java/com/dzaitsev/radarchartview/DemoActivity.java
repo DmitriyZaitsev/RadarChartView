@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.Spinner;
-import com.dzaitsev.widget.RadarChartView;
+import com.dzaitsev.android.widget.RadarChartView;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;

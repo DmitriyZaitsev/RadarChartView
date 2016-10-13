@@ -12,7 +12,7 @@
   android:paddingTop="@dimen/activity_vertical_margin"
   tools:context="com.dzaitsev.radarchartview.DemoActivity">
 
-  <com.dzaitsev.widget.RadarChartView
+  <com.dzaitsev.android.widget.RadarChartView
     android:id="@+id/radar_chart"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

@@ -1,4 +1,4 @@
-package com.dzaitsev.widget;
+package com.dzaitsev.android.widget;
 
 import android.graphics.Paint;
 import android.support.annotation.NonNull;

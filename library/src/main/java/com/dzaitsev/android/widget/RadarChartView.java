@@ -1,4 +1,4 @@
-package com.dzaitsev.widget;
+package com.dzaitsev.android.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -17,11 +17,11 @@ import java.util.Map;
 import static android.graphics.Color.BLACK;
 import static android.graphics.Color.parseColor;
 import static android.graphics.Paint.Style.STROKE;
-import static com.dzaitsev.widget.Utils.createPaint;
-import static com.dzaitsev.widget.Utils.createPoint;
-import static com.dzaitsev.widget.Utils.createPoints;
-import static com.dzaitsev.widget.Utils.gradient;
-import static com.dzaitsev.widget.Utils.mutatePaint;
+import static com.dzaitsev.android.widget.Utils.createPaint;
+import static com.dzaitsev.android.widget.Utils.createPoint;
+import static com.dzaitsev.android.widget.Utils.createPoints;
+import static com.dzaitsev.android.widget.Utils.gradient;
+import static com.dzaitsev.android.widget.Utils.mutatePaint;
 import static java.lang.StrictMath.PI;
 import static java.lang.StrictMath.ceil;
 import static java.lang.StrictMath.cos;
