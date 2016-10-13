@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.support.annotation.IntDef;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -22,9 +21,9 @@ import static android.graphics.Paint.Style.STROKE;
 import static com.dzaitsev.android.widget.Utils.createPaint;
 import static com.dzaitsev.android.widget.Utils.createPoint;
 import static com.dzaitsev.android.widget.Utils.createPoints;
+import static com.dzaitsev.android.widget.Utils.dp;
 import static com.dzaitsev.android.widget.Utils.gradient;
 import static com.dzaitsev.android.widget.Utils.mutatePaint;
-import static com.dzaitsev.android.widget.Utils.dp;
 import static com.dzaitsev.android.widget.Utils.sp;
 import static java.lang.StrictMath.PI;
 import static java.lang.StrictMath.ceil;
@@ -40,33 +39,31 @@ import static java.lang.StrictMath.min;
  */
 @SuppressWarnings("ClassWithTooManyFields")
 public class RadarChartView extends View {
-  public static final int                          CHART_STYLE_FILL   = 0;
-  public static final int                          CHART_STYLE_STROKE = 1;
-  private final       LinkedHashMap<String, Float> axis               = new LinkedHashMap<>();
-  private final       Rect                         rect               = new Rect();
-  private final       Path                         path               = new Path();
-  private final       TextPaint                    textPaint          = new TextPaint(Paint.ANTI_ALIAS_FLAG);
-  private final       Paint                        paint              = createPaint(BLACK);
+  private int         startColor;
+  private int         endColor;
+  private int         axisColor;
+  private float       axisMax;
+  private float       axisTick;
+  private int         axisWidth;
+  private int         chartColor;
+  private int         chartWidth;
+  private Paint.Style chartStyle;
+  private boolean     circlesOnly;
+  private boolean     autoSize;
+  private boolean     smoothGradient;
 
-  private int     startColor;
-  private int     endColor;
-  private int     axisColor;
-  private float   axisMax;
-  private float   axisTick;
-  private int     axisWidth;
-  private int     chartColor;
-  private int     chartWidth;
-  private int     chartStyle;
-  private int     centerX;
-  private int     centerY;
-  private Ring[]  rings;
-  private boolean circlesOnly;
-  private boolean autoSize;
-  private boolean smoothGradient;
-  private float[] vertices;
-  private float   ratio;
-  private float   axisMaxInternal;
-  private float   axisTickInternal;
+  private final LinkedHashMap<String, Float> axis;
+  private final Rect                         rect;
+  private final Path                         path;
+  private final TextPaint                    textPaint;
+  private final Paint                        paint;
+  private       int                          centerX;
+  private       int                          centerY;
+  private       Ring[]                       rings;
+  private       float[]                      vertices;
+  private       float                        ratio;
+  private       float                        axisMaxInternal;
+  private       float                        axisTickInternal;
 
   public RadarChartView(Context context) {
     this(context, null);
@@ -78,6 +75,12 @@ public class RadarChartView extends View {
 
   public RadarChartView(Context context, AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
+    axis = new LinkedHashMap<>();
+    rect = new Rect();
+    path = new Path();
+    textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
+    paint = createPaint(BLACK);
+
     final TypedArray colors = context.obtainStyledAttributes(attrs, new int[] {
         R.attr.colorAccent, R.attr.colorPrimary, R.attr.colorPrimaryDark
     }, defStyleAttr, 0);
@@ -99,7 +102,7 @@ public class RadarChartView extends View {
     axisWidth = values.getDimensionPixelSize(R.styleable.RadarChartView_axisWidth, dp(1, metrics));
     chartColor = values.getColor(R.styleable.RadarChartView_chartColor, colorAccent);
     chartWidth = values.getDimensionPixelSize(R.styleable.RadarChartView_chartWidth, dp(3, metrics));
-    chartStyle = values.getInt(R.styleable.RadarChartView_chartStyle, STROKE.ordinal());
+    chartStyle = Paint.Style.values()[values.getInt(R.styleable.RadarChartView_chartStyle, STROKE.ordinal())];
     smoothGradient = values.getBoolean(R.styleable.RadarChartView_smoothGradient, false);
     values.recycle();
 
@@ -175,20 +178,13 @@ public class RadarChartView extends View {
     invalidate();
   }
 
-  @ChartStyle public final int getChartStyle() {
+  public final Paint.Style getChartStyle() {
     return chartStyle;
   }
 
-  public final void setChartStyle(@ChartStyle int chartStyle) {
-    switch (chartStyle) {
-      case CHART_STYLE_FILL:
-      case CHART_STYLE_STROKE:
-        this.chartStyle = chartStyle;
-        invalidate();
-        break;
-      default:
-        throw new IllegalArgumentException("Use RadarChartView.CHART_STYLE_FILL or RadarChartView.CHART_STYLE_STROKE");
-    }
+  public final void setChartStyle(Paint.Style chartStyle) {
+    this.chartStyle = chartStyle;
+    invalidate();
   }
 
   public final float getChartWidth() {
@@ -404,8 +400,7 @@ public class RadarChartView extends View {
     }
     path.close();
 
-    mutatePaint(paint, chartColor, chartStyle == CHART_STYLE_STROKE ? (float) (chartWidth * cos(PI / count)) + 2 : chartWidth,
-        Paint.Style.values()[chartStyle]);
+    mutatePaint(paint, chartColor, chartWidth, chartStyle);
     canvas.drawPath(path, paint);
   }
 
@@ -424,10 +419,6 @@ public class RadarChartView extends View {
     calcAxisTickInternal();
     buildRings();
     invalidate();
-  }
-
-  @IntDef({ CHART_STYLE_FILL, CHART_STYLE_STROKE })
-  public @interface ChartStyle {
   }
 
   private static class Ring {

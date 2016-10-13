@@ -30,6 +30,7 @@
     <attr name="chartStyle" format="enum">
       <enum name="fill" value="0" />
       <enum name="stroke" value="1" />
+      <enum name="fill_and_stroke" value="2" />
     </attr>
     <attr name="textSize" format="dimension" />
     <attr name="circlesOnly" format="boolean" />

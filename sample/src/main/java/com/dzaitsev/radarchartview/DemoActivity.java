@@ -1,5 +1,6 @@
 package com.dzaitsev.radarchartview;
 
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -109,7 +110,7 @@ public class DemoActivity extends AppCompatActivity {
     });
     ((CompoundButton) findViewById(R.id.fillStroke)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        chartView.setChartStyle(isChecked ? RadarChartView.CHART_STYLE_FILL : RadarChartView.CHART_STYLE_STROKE);
+        chartView.setChartStyle(isChecked ? Paint.Style.FILL : Paint.Style.STROKE);
       }
     });
 
