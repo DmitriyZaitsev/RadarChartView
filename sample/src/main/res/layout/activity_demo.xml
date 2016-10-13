@@ -39,7 +39,8 @@
     app:axisMax="280"
     app:axisTick="66"
     app:endColor="#c3e3e5"
-    app:graphStyle="stroke"
+    app:chartStyle="stroke"
+    app:chartWidth="5dp"
     app:startColor="#5f9ca1"
     app:textSize="12sp" />
 

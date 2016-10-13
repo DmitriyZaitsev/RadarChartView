@@ -45,12 +45,12 @@ public class RadarChartView extends View {
   private int     startColor;
   private int     endColor;
   private int     axisColor;
-  private int     graphColor;
   private float   axisMax;
   private float   axisTick;
   private float   axisWidth;
-  private float   graphWidth;
-  private int     graphStyle;
+  private int     chartColor;
+  private float   chartWidth;
+  private int     chartStyle;
   private int     centerX;
   private int     centerY;
   private Ring[]  rings;
@@ -84,15 +84,15 @@ public class RadarChartView extends View {
     startColor = values.getColor(R.styleable.RadarChartView_startColor, colorPrimaryDark);
     endColor = values.getColor(R.styleable.RadarChartView_endColor, colorPrimary);
     axisColor = values.getColor(R.styleable.RadarChartView_axisColor, BLACK);
-    graphColor = values.getColor(R.styleable.RadarChartView_graphColor, colorAccent);
     axisMax = values.getFloat(R.styleable.RadarChartView_axisMax, 20);
     axisTick = values.getFloat(R.styleable.RadarChartView_axisTick, axisMax / 5);
     final int textSize = values.getDimensionPixelSize(R.styleable.RadarChartView_textSize, 15);
     circlesOnly = values.getBoolean(R.styleable.RadarChartView_circlesOnly, false);
     autoSize = values.getBoolean(R.styleable.RadarChartView_autoSize, true);
     axisWidth = values.getFloat(R.styleable.RadarChartView_axisWidth, 1);
-    graphWidth = values.getFloat(R.styleable.RadarChartView_graphWidth, 3);
-    graphStyle = values.getInt(R.styleable.RadarChartView_graphStyle, STROKE.ordinal());
+    chartColor = values.getColor(R.styleable.RadarChartView_chartColor, colorAccent);
+    chartWidth = values.getFloat(R.styleable.RadarChartView_chartWidth, 3);
+    chartStyle = values.getInt(R.styleable.RadarChartView_chartStyle, STROKE.ordinal());
     smoothGradient = values.getBoolean(R.styleable.RadarChartView_smoothGradient, false);
     values.recycle();
 
@@ -159,6 +159,33 @@ public class RadarChartView extends View {
     invalidate();
   }
 
+  public final int getChartColor() {
+    return chartColor;
+  }
+
+  public final void setChartColor(int chartColor) {
+    this.chartColor = chartColor;
+    invalidate();
+  }
+
+  public final int getChartStyle() {
+    return chartStyle;
+  }
+
+  public final void setChartStyle(int chartStyle) {
+    this.chartStyle = chartStyle;
+    invalidate();
+  }
+
+  public final float getChartWidth() {
+    return chartWidth;
+  }
+
+  public final void setChartWidth(float chartWidth) {
+    this.chartWidth = chartWidth;
+    invalidate();
+  }
+
   public final int getEndColor() {
     return endColor;
   }
@@ -166,33 +193,6 @@ public class RadarChartView extends View {
   public final void setEndColor(int endColor) {
     this.endColor = endColor;
     invalidate();
-    invalidate();
-  }
-
-  public final int getGraphColor() {
-    return graphColor;
-  }
-
-  public final void setGraphColor(int graphColor) {
-    this.graphColor = graphColor;
-    invalidate();
-  }
-
-  public final int getGraphStyle() {
-    return graphStyle;
-  }
-
-  public final void setGraphStyle(int graphStyle) {
-    this.graphStyle = graphStyle;
-    invalidate();
-  }
-
-  public final float getGraphWidth() {
-    return graphWidth;
-  }
-
-  public final void setGraphWidth(float graphWidth) {
-    this.graphWidth = graphWidth;
     invalidate();
   }
 
@@ -390,7 +390,7 @@ public class RadarChartView extends View {
     }
     path.close();
 
-    mutatePaint(paint, graphColor, graphWidth, Paint.Style.values()[graphStyle]);
+    mutatePaint(paint, chartColor, chartWidth, Paint.Style.values()[chartStyle]);
     canvas.drawPath(path, paint);
   }
 
