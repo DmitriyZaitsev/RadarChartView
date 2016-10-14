@@ -380,22 +380,23 @@ public class RadarChartView extends View {
       return;
     }
 
-    path.reset();
-
     Float[] values = new Float[count];
     values = axis.values()
         .toArray(values);
-    if (count > 0) {
-      final float[] first = createPoint(values[0] * ratio, -PI / 2, centerX, centerY);
-      if (count == 1) {
-        path.moveTo(centerX, centerY);
-      } else {
-        path.moveTo(first[0], first[1]);
-        path.setLastPoint(first[0], first[1]);
-        for (int i = 1; i < count; i++) {
-          final float[] point = createPoint(values[i] * ratio, (2 * PI / count) * i - PI / 2, centerX, centerY);
-          path.lineTo(point[0], point[1]);
-        }
+    final float[] first = createPoint(values[0] * ratio, -PI / 2, centerX, centerY);
+    final float firstX = first[0];
+    final float firstY = first[1];
+    path.reset();
+    path.setLastPoint(firstX, firstY);
+
+    if (count == 1) {
+      path.moveTo(centerX, centerY);
+      path.lineTo(firstX, firstY);
+    } else {
+      path.moveTo(firstX, firstY);
+      for (int i = 1; i < count; i++) {
+        final float[] point = createPoint(values[i] * ratio, (2 * PI / count) * i - PI / 2, centerX, centerY);
+        path.lineTo(point[0], point[1]);
       }
     }
     path.close();
