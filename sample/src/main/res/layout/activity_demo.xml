@@ -41,6 +41,7 @@
     app:chartColor="#C8FF4081"
     app:chartStyle="stroke"
     app:chartWidth="3dp"
+    app:circlesOnly="false"
     app:endColor="#c3e3e5"
     app:startColor="#5f9ca1"
     app:textSize="12sp" />

@@ -14,18 +14,14 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static java.lang.Math.min;
 import static java.util.Arrays.asList;
 
 public class DemoActivity extends AppCompatActivity {
-
-  static final         String[] KEYS      = { "WI", "CA", "ID", "NY", "NM", "MN", "PA", "IA", "OH", "VT" };
-  private static final float    MAX_VALUE = 2855.681F;
-  static final         float[]  VALUES    = {
-      MAX_VALUE, 2312.895F, 871.640F, 751.280F, 661.293F, 661.293F, 426.985F, 267.249F, 196.676F, 127.346F
-  };
+  static final String[] KEYS = { "VT", "OH", "IA", "PA", "MN", "NM", "NY", "ID", "CA", "WI", };
+  static final float[] VALUES = { 127.346F, 196.676F, 267.249F, 426.985F, 661.293F, 661.293F, 751.280F, 871.640F, 2312.895F, 2855.681F, };
   int            position;
   RadarChartView chartView;
+  SeekBar        valueBar;
   private final SeekBar.OnSeekBarChangeListener axisTickBarListener = new OnProgressChangedListener() {
     @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
       if (progress > 0) {
@@ -33,11 +29,10 @@ public class DemoActivity extends AppCompatActivity {
       }
     }
   };
-  SeekBar        valueBar;
   ArrayAdapter<String> adapter;
   private final SeekBar.OnSeekBarChangeListener valueBarListener = new OnProgressChangedListener() {
     @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-      chartView.addOrReplace(KEYS[min(VALUES.length - 1 - position, valueBar.getMax())], progress << 1);
+      chartView.addOrReplace(KEYS[position], progress);
     }
   };
   private SeekBar axisTickBar;
@@ -48,16 +43,16 @@ public class DemoActivity extends AppCompatActivity {
 
     chartView = (RadarChartView) findViewById(R.id.radar_chart);
     final Map<String, Float> axis = new LinkedHashMap<>(VALUES.length); // in 1,000 pounds (Sep 19, 2016)
-    axis.put(KEYS[9], VALUES[9]);
-    axis.put(KEYS[8], VALUES[8]);
-    axis.put(KEYS[7], VALUES[7]);
-    axis.put(KEYS[6], VALUES[6]);
-    axis.put(KEYS[5], VALUES[5]);
-    axis.put(KEYS[4], VALUES[4]);
-    axis.put(KEYS[3], VALUES[3]);
-    axis.put(KEYS[2], VALUES[2]);
-    axis.put(KEYS[1], VALUES[1]);
     axis.put(KEYS[0], VALUES[0]);
+    axis.put(KEYS[1], VALUES[1]);
+    axis.put(KEYS[2], VALUES[2]);
+    axis.put(KEYS[3], VALUES[3]);
+    axis.put(KEYS[4], VALUES[4]);
+    axis.put(KEYS[5], VALUES[5]);
+    axis.put(KEYS[6], VALUES[6]);
+    axis.put(KEYS[7], VALUES[7]);
+    axis.put(KEYS[8], VALUES[8]);
+    axis.put(KEYS[9], VALUES[9]);
     chartView.setAxis(axis);
 
     axisTickBar = (SeekBar) findViewById(R.id.axisTick);
@@ -85,9 +80,8 @@ public class DemoActivity extends AppCompatActivity {
       @Override public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         chartView.clearAxis();
         adapter.clear();
-        final int capacity = VALUES.length - progress;
-        final Map<String, Float> map = new LinkedHashMap<>(capacity);
-        for (int i = VALUES.length - 1; i >= capacity; i--) {
+        final Map<String, Float> map = new LinkedHashMap<>(progress);
+        for (int i = 0; i < progress; i++) {
           final String key = KEYS[i];
           map.put(key, VALUES[i]);
           adapter.add(key);
@@ -106,6 +100,7 @@ public class DemoActivity extends AppCompatActivity {
     ((CompoundButton) findViewById(R.id.autoSize)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
       @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         chartView.setAutoSize(isChecked);
+        updateSeekBars();
       }
     });
     ((CompoundButton) findViewById(R.id.fillStroke)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
