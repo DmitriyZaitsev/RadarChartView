@@ -1,9 +1,8 @@
-This is a view that draws radar chart diagram.
+# Android view (widget) for rendering radial diagrams
+
 
 ## Demo
-<img src="/images/demo_01.gif" height="853" width="480">
-<img src="/images/demo_02.gif" height="853" width="480">
-<img src="/images/demo_03.gif" height="853" width="480">
+<img src="/images/demo_01.gif" height="524" width="296"><img src="/images/demo_02.gif" height="524" width="296"><img src="/images/demo_03.gif" height="524" width="296">
 
 ## How to start
 
@@ -59,6 +58,16 @@ From XML
 ## Download
 
 Grab via Gradle:
+```groovy
+// add this repository to your project
+allprojects {
+  repositories {
+    // ...
+    maven { url 'https://dl.bintray.com/dmitriyzaitsev/maven' }
+    // ...
+  }
+}
+```
 
 ```groovy
 compile 'com.dzaitsev.android.widget:radarchartview:0.1.0'

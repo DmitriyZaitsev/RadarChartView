@@ -19,6 +19,7 @@ apply plugin: 'com.android.library'
 android {
   compileSdkVersion 24
   buildToolsVersion "24.0.3"
+  packageBuildConfig false
 
   defaultConfig {
     minSdkVersion 9
@@ -36,8 +37,12 @@ android {
   }
 }
 
+apply from: '../gradle/bintray.gradle'
+apply from: '../gradle/maven.gradle'
+
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile 'com.android.support:support-annotations:24.2.1'
   androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
     exclude group: 'com.android.support', module: 'support-annotations'
   })

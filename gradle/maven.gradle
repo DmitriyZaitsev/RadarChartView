@@ -1,0 +1,56 @@
+/**
+ * Copyright 2016 Dmytro Zaitsev
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+apply plugin: 'com.github.dcendents.android-maven'
+
+group = POM_GROUP_ID // Maven Group ID for the artifact
+
+install {
+  repositories.mavenInstaller {
+    // This generates POM.xml with proper parameters
+    pom {
+      project {
+        packaging 'aar'
+        groupId POM_GROUP_ID
+        artifactId POM_ARTIFACT
+
+        // Add your description here
+        name POM_LIBRARY_NAME
+        description POM_LIBRARY_DESCRIPTION
+        url POM_SITE_URL
+
+        // Set your license
+        licenses {
+          license {
+            name POM_LICENSE_NAME
+            url POM_LICENSE_URL
+          }
+        }
+        developers {
+          developer {
+            id POM_DEVELOPER_ID
+            name POM_DEVELOPER_NAME
+            email POM_DEVELOPER_EMAIL
+          }
+        }
+        scm {
+          connection POM_GIT_URL
+          developerConnection POM_GIT_URL
+          url POM_SITE_URL
+        }
+      }
+    }
+  }
+}

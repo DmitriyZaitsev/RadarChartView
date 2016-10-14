@@ -23,12 +23,15 @@ buildscript {
   dependencies {
     classpath 'com.android.tools.build:gradle:2.2.1'
     classpath 'gradle.plugin.nl.javadude.gradle.plugins:license-gradle-plugin:0.12.1'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
+    classpath 'com.github.dcendents:android-maven-gradle-plugin:1.4.1'
   }
 }
 
 allprojects {
   repositories {
     jcenter()
+    maven {url 'https://dl.bintray.com/dmitriyzaitsev/maven' }
   }
   apply from: rootProject.file('gradle/license.gradle')
 }
