@@ -92,22 +92,14 @@ public class DemoActivity extends AppCompatActivity {
       }
     });
 
-    ((CompoundButton) findViewById(R.id.circlesOnly)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        chartView.setCirclesOnly(isChecked);
-      }
+    ((CompoundButton) findViewById(R.id.circlesOnly)).setOnCheckedChangeListener(
+        (buttonView, isChecked) -> chartView.setCirclesOnly(isChecked));
+    ((CompoundButton) findViewById(R.id.autoSize)).setOnCheckedChangeListener((buttonView, isChecked) -> {
+      chartView.setAutoSize(isChecked);
+      updateSeekBars();
     });
-    ((CompoundButton) findViewById(R.id.autoSize)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        chartView.setAutoSize(isChecked);
-        updateSeekBars();
-      }
-    });
-    ((CompoundButton) findViewById(R.id.fillStroke)).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-      @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        chartView.setChartStyle(isChecked ? Paint.Style.FILL : Paint.Style.STROKE);
-      }
-    });
+    ((CompoundButton) findViewById(R.id.fillStroke)).setOnCheckedChangeListener(
+        (buttonView, isChecked) -> chartView.setChartStyle(isChecked ? Paint.Style.FILL : Paint.Style.STROKE));
 
     updateSeekBars();
   }

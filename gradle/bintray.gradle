@@ -77,8 +77,8 @@ bintray {
     desc = POM_LIBRARY_DESCRIPTION
     websiteUrl = POM_SITE_URL
     vcsUrl = POM_GIT_URL
-    licenses = ['Apache-2.0']
-    labels = ['android', 'widget', 'view', 'chart', 'radar', 'radarchart', 'graphics', 'diagram']
+    licenses = readArray(POM_ALL_LICENSES)
+    labels = readArray(POM_ALL_LABELS)
     publish = true
     publicDownloadNumbers = true
     version {
@@ -91,4 +91,10 @@ bintray {
       }
     }
   }
+}
+
+String[] readArray(final String property) {
+  final String[] props = property.split(',')
+  props.each { defaultTasks.add(it.trim()) }
+  return props;
 }

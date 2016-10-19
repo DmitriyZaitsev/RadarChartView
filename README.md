@@ -2,8 +2,7 @@
 
 
 ## Demo
-<img src="/images/demo_01.gif" height="524" width="296"><img src="/images/demo_02.gif" height="524" width="296"><img src="/images/demo_03.gif" height="524" width="296">
-
+<img src="/images/demo_01.gif" width="33.3%"><img src="/images/demo_02.gif" width="33.3%"><img src="/images/demo_03.gif" width="33.3%">
 ## How to start
 
 From code
